@@ -143,16 +143,17 @@ The profile stores CGPA, graduation year, degree, branch, skills and a resume UR
 - GET `/api/student/resume` — authenticated student downloads their own uploaded resume.
 - GET `/api/recruiter/applications/{applicationId}/resume` — recruiter can download the resume only when the application belongs to a job owned by that recruiter.
 
-Files are stored under `PLACEMATE_UPLOAD_DIR` using generated filenames. Keep this directory on persistent storage and back it up. Current validation checks size and filename extension; production deployment must add content/MIME inspection and malware scanning.
+Files are stored under `PLACEMATE_UPLOAD_DIR` using generated filenames that include the owning student ID. Upload validation checks size, extension, and basic PDF/DOC/DOCX file signatures/container structure. Stored-file downloads verify the owner ID, and recruiter access is limited to applications for jobs owned by that recruiter. Keep this directory on persistent storage and back it up. Production deployment should still add comprehensive MIME inspection and malware scanning.
 
 ## Interviews
 
 - POST `/api/recruiter/applications/{applicationId}/interviews` — schedule for an applicant on a recruiter's own job.
 - GET `/api/recruiter/interviews` — list interviews scheduled by the recruiter.
 - GET `/api/student/interviews` — list interviews for the authenticated student's applications.
+- PUT `/api/recruiter/interviews/{id}` — reschedule a scheduled interview or update its date/time and meeting details (recruiter owner only).
 - PATCH `/api/recruiter/interviews/{id}/status?status=COMPLETED` — update status to `SCHEDULED`, `COMPLETED`, or `CANCELLED`.
 
-The schedule request contains `scheduledAt` (future ISO-8601 instant), `durationMinutes` (15–480), `mode` (`ONLINE`, `IN_PERSON`, or `PHONE`), optional `meetingLink`, `location`, and `notes`. Existing interview date/details editing and rescheduling are not exposed yet.
+The schedule request contains `scheduledAt` (future ISO-8601 instant), `durationMinutes` (15–480), `mode` (`ONLINE`, `IN_PERSON`, or `PHONE`), optional `meetingLink`, `location`, and `notes`. Rescheduling is available only while an interview is in SCHEDULED status; the student receives an in-app notification when it changes.
 
 ## Notifications
 
