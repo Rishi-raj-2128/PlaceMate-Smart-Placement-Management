@@ -1,135 +1,144 @@
 # PlaceMate — Smart Placement Management System
 
-PlaceMate is a placement-management platform for students, recruiters, and campus placement teams.
+PlaceMate is a role-based placement management platform for students, recruiters, and campus placement teams.
 
-## Project structure
+## Repository structure
 
 ```text
-PlaceMate/
-├── src/                    # React + Vite frontend
-│   ├── services/api.js     # Axios client and JWT header handling
-│   ├── App.jsx              # Routes, dashboards, and authentication UI
+.
+├── src/                         # React + Vite frontend
+│   ├── pages/                   # Job, application, interview, notification and admin pages
+│   ├── services/api.js          # Axios API clients and JWT handling
+│   ├── App.jsx                  # Landing page, authentication, routes and dashboards
 │   └── styles.css
-├── backend/                 # Java Spring Boot REST API
+├── backend/                     # Java 17+ Spring Boot REST API
 │   ├── src/main/java/com/placemate/
+│   ├── src/test/java/
+│   ├── Dockerfile
 │   └── pom.xml
-├── .env.example
+├── .github/workflows/ci.yml     # Frontend and backend CI workflow
+├── Dockerfile                   # Frontend production image
+├── docker-compose.yml           # MySQL + backend + frontend
+├── nginx.conf
 └── README.md
 ```
 
 ## Technology stack
 
-**Frontend**
-- React + Vite
-- React Router DOM
-- Axios
-- Framer Motion
-- Recharts
-- Lucide React
-
-**Backend**
-- Java 17+
-- Spring Boot
-- Spring Security
-- Spring Data JPA
-- MySQL
-- BCrypt password hashing
-- JWT authentication (JJWT)
+- **Frontend:** React, Vite, React Router, Axios, Framer Motion, Recharts, Lucide React
+- **Backend:** Java 17, Spring Boot, Spring Security, Spring Data JPA, Bean Validation
+- **Database:** MySQL 8+
+- **Authentication:** BCrypt password hashing and stateless JWT
+- **Deployment:** Docker, Docker Compose, Nginx
+- **CI:** GitHub Actions (frontend production build and backend Maven verification)
 
 ## Run locally
 
-### 1. Start MySQL
+### Requirements
+- Node.js 22+ and npm
+- JDK 17+
+- Maven 3.9+
+- MySQL 8+
 
-Create a database:
+### 1. Database
+Create a database and configure your local MySQL credentials:
 
 ```sql
 CREATE DATABASE placemate_db;
 ```
 
-Make sure your local MySQL service is running and note your username/password.
-
-### 2. Start the backend
-
-Open a terminal in the repository root:
+### 2. Backend
+From the repository root:
 
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-Backend default URL: `http://localhost:8080`
+The API defaults to `http://localhost:8080`. Configure `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, and `JWT_SECRET` as environment variables when needed.
 
-Configure `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, and `JWT_SECRET` as environment variables if your local settings differ. For any shared or production environment, generate a unique Base64 JWT secret (at least 32 random bytes); never use the development fallback.
-
-### 3. Start the frontend
-
-Open a second terminal in the repository root:
+### 3. Frontend
+In a second terminal, from the repository root:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Frontend default URL: `http://localhost:5173`
+The Vite app defaults to `http://localhost:5173`. The API client defaults to `http://localhost:8080/api`; override it with `VITE_API_BASE_URL` in a local `.env` file if needed.
 
-The frontend API base URL defaults to `http://localhost:8080/api`. To override it, copy `.env.example` to `.env` and set `VITE_API_BASE_URL`.
+## Main capabilities implemented in code
 
-## Authentication API
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| POST | `/api/auth/register` | Register a Student or Recruiter |
-| POST | `/api/auth/login` | Verify credentials and issue JWT |
-| GET | `/api/auth/me` | Return the authenticated user's profile |
-| GET | `/api/health` | Backend health check |
-
-Registration accepts Student profile fields (`enrollmentNumber`, `department`) or Recruiter profile fields (`companyName`, optional `companyWebsite`). Public Admin registration is blocked. Passwords are stored as BCrypt hashes; the API response does not expose password hashes.
-
-The frontend stores the returned access token in browser local storage and sends it as `Authorization: Bearer <token>` on API requests. Use HTTPS and a stronger token-storage approach before production deployment.
-
-## Current implementation status
-
-| Area | Status |
+| Area | Current implementation |
 |---|---|
-| Landing page and responsive dashboard UI | Implemented |
-| Student / Recruiter registration UI | Connected to backend API |
-| Login UI | Connected to backend API |
-| BCrypt password hashing | Implemented in backend |
-| JWT generation and request authentication | Implemented in backend |
-| Role-based API authorization | Implemented for student/recruiter/admin API path prefixes |
-| Current-user endpoint | Implemented |
-| Job create/edit/delete and approval APIs | Implemented in code; local testing pending |
-| Public approved-job search and filters | Implemented in code; local testing pending |
-| Student job applications and duplicate prevention | Implemented in code; local testing pending |
-| Recruiter applicant review and status updates | Implemented in code; local testing pending |
-| Student profile, CGPA and skills persistence | Implemented in code; local testing pending |
-| Rule-based eligibility and job match scoring | Implemented in code; local testing pending |
-| Interviews, notifications and placement analytics APIs | Not implemented yet |
-| Live dashboard data | Still uses clearly illustrative frontend fixtures |
-| Email verification and password reset | Not implemented |
-| Automated build / integration tests | Pending local execution |
+| Authentication | Student/recruiter registration, login, current-user endpoint, BCrypt, JWT, role-based authorization; public Admin registration blocked |
+| Job management | Recruiter-owned create/edit/delete, public approved-job search, filters, Admin approve/reject workflow |
+| Applications | Student apply flow, duplicate application protection, student tracker, recruiter applicant review and status updates |
+| Student profile | CGPA, graduation year, degree, branch, skills and resume reference |
+| Eligibility matching | Deterministic rule-based eligibility and match percentage with explanations; not an AI prediction |
+| Resume files | PDF/DOC/DOCX upload (5 MB limit), student download and recruiter download restricted to applicants for the recruiter's own jobs |
+| Interviews | Recruiter schedules an interview with date/time, duration, mode, meeting link/location and notes; recruiter can mark it completed or cancelled; students can view their schedule |
+| Notifications | In-app notification centre, unread count, mark-one-read and mark-all-read; generated for new applications, application status changes and interview events |
+| Admin workspace | Student/recruiter lists, recruiter company verification, company summaries, placement metrics, department hiring report and CSV application export |
+| Dashboards | Student, recruiter and admin summary cards and recent activity now request API data |
+| Deployment | Frontend/backend Dockerfiles, Nginx SPA/API proxy, Docker Compose MySQL persistence and resume volume |
+| CI | GitHub Actions workflow configured for frontend build and backend Maven verification |
+
+## Important API groups
+
+All protected routes require `Authorization: Bearer <JWT>`.
+
+- `/api/auth/**` — register, login, current user
+- `/api/jobs/**` — public approved job search and details
+- `/api/student/**` — profile, job matches, applications, interviews and resume
+- `/api/recruiter/**` — recruiter jobs, applicants, application status, interviews and applicant resume access
+- `/api/admin/**` — job approvals, user/company management and placement reports
+- `/api/notifications/**` — authenticated user's notification centre
+- `/api/health` — service health
+
+See [backend/README.md](backend/README.md) for endpoint details and example payloads.
+
+## Docker deployment
+
+Set these environment variables before starting the stack:
+
+- `DB_PASSWORD` — password for the application MySQL user
+- `MYSQL_ROOT_PASSWORD` — MySQL root password
+- `JWT_SECRET` — unique Base64-encoded secret with at least 32 random bytes
+- Optional: `APP_PORT`, `JWT_EXPIRATION_MS`, `CORS_ALLOWED_ORIGINS`
+
+Then run:
+
+```bash
+docker compose up --build -d
+```
+
+Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded resumes are stored in named Docker volumes. Back up these volumes before upgrades or migration.
 
 ## Development log
 
-- **Frontend foundation:** landing page, responsive dashboards, navigation, charts, and UI components.
-- **Backend foundation:** Spring Boot, MySQL/JPA configuration, CORS, and health endpoint.
-- **Authentication:** registration, login, BCrypt, JWT, current-user endpoint, and role-based API authorization.
-- **Frontend integration:** Axios API client, real registration/login requests, token persistence, session restoration, logout, and API error/loading states.
-- **Job management:** recruiter-owned job creation, editing and deletion; public approved-job search; admin approve/reject queue; job review notes. React screens are connected to these endpoints.
-- **Applications:** student apply action, unique student/job application constraint, student application tracker, recruiter applicant list, and recruiter status updates.
-- **Student profile and matching:** persistent academic profile (CGPA, graduation year, degree, branch, skills, resume link) plus eligibility explanations and a rule-based job match score.
+- **Foundation:** responsive landing page, role-aware dashboard layouts, navigation and base UI.
+- **Authentication:** backend registration/login, BCrypt, JWT, role checks and frontend session integration.
+- **Jobs:** recruiter job CRUD, public approved listings, Admin review queue and filters.
+- **Applications:** student applications, duplicate protection, recruiter applicant lists and status changes.
+- **Profiles and matching:** persistent student academic profile and deterministic eligibility/match explanations.
+- **Resume files:** authenticated upload/download endpoints and recruiter ownership check.
+- **Interviews and notifications:** interview scheduling/status and event-triggered in-app notifications.
+- **Admin workspace:** user/company lists, company verification, overview metrics and placement reporting.
+- **Operational setup:** CI workflow, health endpoint, Dockerfiles, Compose and Nginx configuration.
+- **README refresh:** setup, API groups, current feature scope and deployment notes updated.
 
-## Important notes
+## Known limitations and verification status
 
-- Admin accounts must be provisioned by the placement team; there is no public Admin signup.
-- Job listings, application tracking, student academic profiles, and eligibility matching now use backend APIs. Resume file upload, interviews, notifications, admin analytics, and live dashboard metrics still need implementation; some dashboard data remains illustrative.
-- Compilation, database connectivity, and end-to-end flows (authentication, job management, and applications) have **not yet been verified on a local machine**. Run both apps locally and test before treating this as production-ready.
-- Before production: configure HTTPS, unique secrets, rate limiting, email verification, password recovery, audit logging, and secure token storage.
+- The latest GitHub commit was inspected, but no successful CI run or local frontend/backend build result was available during this review. Treat compilation, database migrations, browser behavior and full end-to-end flows as **not yet verified** until the GitHub Actions run completes and the application is exercised against MySQL.
+- The CI workflow currently includes a frontend build and backend Maven verification plus a backend health smoke test; domain-level automated tests are still limited.
+- Interview creation and completion/cancellation are implemented; editing/rescheduling an existing interview's date/details is not yet exposed.
+- Notifications are in-app only. Email/SMS delivery, push notifications and scheduled reminders are not implemented.
+- Resume upload currently validates the filename extension and size. Production hardening should add file-content/MIME inspection, malware scanning, storage outside the application container or in object storage, retention/deletion controls, and backups.
+- Dashboard metrics use live API data, but the landing-page mock preview and sample illustration content remain static.
+- Email verification, password reset, audit logs, rate limiting, production HTTPS/reverse-proxy hardening and a full automated security review remain outstanding.
+- JWT is stored in browser local storage in this MVP. Revisit token storage and refresh/revocation strategy before production.
 
+## Security configuration
 
-## Remaining development roadmap
-
-1. **Resume upload:** secure file upload and recruiter-authorized resume access (a resume URL field is available now).
-2. **Interviews and notifications:** interview scheduling, status notifications and reminders.
-3. **Admin workspace:** student/recruiter management, company verification, placement analytics and reports.
-4. **Production readiness:** automated backend/frontend tests, validation and security review, deployment configuration, logging and documentation.
+Never commit real credentials. Use a unique secret for every environment; the JWT fallback in the local configuration is for development only. Configure the allowed CORS origins explicitly for the deployed frontend.
