@@ -82,6 +82,8 @@ class InterviewApiIntegrationTest {
 
     @AfterEach
     void cleanUp() {
+        users.findByEmailIgnoreCase(recruiterEmail).ifPresent(recruiter ->
+            interviews.deleteAll(interviews.findByCreatedBy_IdOrderByScheduledAtAsc(recruiter.getId())));
         users.findByEmailIgnoreCase(studentEmail).ifPresent(student -> {
             notifications.deleteAll(notifications.findTop100ByUser_IdOrderByCreatedAtDesc(student.getId()));
             applications.deleteAll(applications.findByStudentIdOrderByAppliedAtDesc(student.getId()));
@@ -89,7 +91,6 @@ class InterviewApiIntegrationTest {
         });
         users.findByEmailIgnoreCase(recruiterEmail).ifPresent(recruiter -> {
             notifications.deleteAll(notifications.findTop100ByUser_IdOrderByCreatedAtDesc(recruiter.getId()));
-            interviews.deleteAll(interviews.findByCreatedBy_IdOrderByScheduledAtAsc(recruiter.getId()));
             jobs.findByCreatedByIdOrderByCreatedAtDesc(recruiter.getId()).forEach(jobs::delete);
             users.delete(recruiter);
         });
