@@ -43,7 +43,8 @@ class NotificationControllerTest {
 
     @Test
     void unreadCountUsesAuthenticatedUsersId() {
-        when(users.findByEmailIgnoreCase("student@example.com")).thenReturn(Optional.of(user(41L)));
+        User currentUser=user(41L);
+        when(users.findByEmailIgnoreCase("student@example.com")).thenReturn(Optional.of(currentUser));
         when(notifications.unreadCount(41L)).thenReturn(2L);
 
         assertEquals(2L,controller.unreadCount(auth("student@example.com")));
@@ -53,7 +54,8 @@ class NotificationControllerTest {
 
     @Test
     void markReadUsesAuthenticatedUsersIdAndNotificationId() {
-        when(users.findByEmailIgnoreCase("student@example.com")).thenReturn(Optional.of(user(41L)));
+        User currentUser=user(41L);
+        when(users.findByEmailIgnoreCase("student@example.com")).thenReturn(Optional.of(currentUser));
         NotificationResponse response=new NotificationResponse(9L,"INTERVIEW","Interview","Scheduled.","/interviews",null,null);
         when(notifications.markRead(41L,9L)).thenReturn(response);
 
@@ -65,7 +67,8 @@ class NotificationControllerTest {
 
     @Test
     void markAllReadUsesAuthenticatedUsersId() {
-        when(users.findByEmailIgnoreCase("student@example.com")).thenReturn(Optional.of(user(41L)));
+        User currentUser=user(41L);
+        when(users.findByEmailIgnoreCase("student@example.com")).thenReturn(Optional.of(currentUser));
 
         assertDoesNotThrow(()->controller.readAll(auth("student@example.com")));
 
