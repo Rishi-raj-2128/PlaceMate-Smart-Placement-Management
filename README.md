@@ -98,7 +98,11 @@ The frontend stores the returned access token in browser local storage and sends
 | JWT generation and request authentication | Implemented in backend |
 | Role-based API authorization | Implemented for student/recruiter/admin API path prefixes |
 | Current-user endpoint | Implemented |
-| Job create/edit/delete and approval APIs | Implemented in code; local testing pending |\n| Public approved-job search and filters | Implemented in code; local testing pending |\n| Student job applications and duplicate prevention | Implemented in code; local testing pending |\n| Recruiter applicant review and status updates | Implemented in code; local testing pending |\n| Interviews, notifications and placement analytics APIs | Not implemented yet |
+| Job create/edit/delete and approval APIs | Implemented in code; local testing pending |
+| Public approved-job search and filters | Implemented in code; local testing pending |
+| Student job applications and duplicate prevention | Implemented in code; local testing pending |
+| Recruiter applicant review and status updates | Implemented in code; local testing pending |
+| Interviews, notifications and placement analytics APIs | Not implemented yet |
 | Live dashboard data | Still uses clearly illustrative frontend fixtures |
 | Email verification and password reset | Not implemented |
 | Automated build / integration tests | Pending local execution |
@@ -108,7 +112,9 @@ The frontend stores the returned access token in browser local storage and sends
 - **Frontend foundation:** landing page, responsive dashboards, navigation, charts, and UI components.
 - **Backend foundation:** Spring Boot, MySQL/JPA configuration, CORS, and health endpoint.
 - **Authentication:** registration, login, BCrypt, JWT, current-user endpoint, and role-based API authorization.
-- **Frontend integration:** Axios API client, real registration/login requests, token persistence, session restoration, logout, and API error/loading states.\n- **Job management:** recruiter-owned job creation, editing and deletion; public approved-job search; admin approve/reject queue; job review notes. React screens are connected to these endpoints.\n- **Applications:** student apply action, unique student/job application constraint, student application tracker, recruiter applicant list, and recruiter status updates.
+- **Frontend integration:** Axios API client, real registration/login requests, token persistence, session restoration, logout, and API error/loading states.
+- **Job management:** recruiter-owned job creation, editing and deletion; public approved-job search; admin approve/reject queue; job review notes. React screens are connected to these endpoints.
+- **Applications:** student apply action, unique student/job application constraint, student application tracker, recruiter applicant list, and recruiter status updates.
 
 ## Important notes
 
