@@ -14,42 +14,75 @@ Create the database (or let the configured local MySQL user create it):
 CREATE DATABASE placemate_db;
 ```
 
-Set `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, and optionally `SERVER_PORT` (default 8080).
-Set `JWT_SECRET` to a unique Base64-encoded secret containing at least 32 random bytes. `JWT_EXPIRATION_MS` defaults to 86400000 (24 hours). Never commit real secrets.
+Set environment variables:
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `SERVER_PORT` (default 8080)
+- `JWT_SECRET` (unique Base64 secret containing at least 32 random bytes outside local development)
+- `JWT_EXPIRATION_MS` (default 86400000 / 24 hours)
+
+Never commit real credentials or production secrets. The configured JWT fallback is for local development only.
 
 ## Run
+From the repository root:
+
 ```bash
 cd backend
 mvn spring-boot:run
 ```
-Health: `GET http://localhost:8080/api/health`
 
-## Authentication API
+Health endpoint: `GET http://localhost:8080/api/health`
+
+## Authentication endpoints
 
 ### Student registration — POST /api/auth/register
 ```json
-{"fullName":"Aarav Sharma","email":"aarav@example.com","password":"StrongPass123","role":"STUDENT","enrollmentNumber":"CGC2026CS001","department":"Computer Science"}
+{
+  "fullName": "Aarav Sharma",
+  "email": "aarav@example.com",
+  "password": "StrongPass123",
+  "role": "STUDENT",
+  "enrollmentNumber": "CGC2026CS001",
+  "department": "Computer Science"
+}
 ```
 
 ### Recruiter registration — POST /api/auth/register
 ```json
-{"fullName":"Recruiter Name","email":"recruiter@example.com","password":"StrongPass123","role":"RECRUITER","companyName":"Example Technologies","companyWebsite":"https://example.com"}
+{
+  "fullName": "Recruiter Name",
+  "email": "recruiter@example.com",
+  "password": "StrongPass123",
+  "role": "RECRUITER",
+  "companyName": "Example Technologies",
+  "companyWebsite": "https://example.com"
+}
 ```
 
 ### Login — POST /api/auth/login
 ```json
-{"email":"aarav@example.com","password":"StrongPass123"}
+{
+  "email": "aarav@example.com",
+  "password": "StrongPass123"
+}
 ```
-Returns a signed JWT, expiry duration, and safe user summary. Password hashes are never returned.
 
-### Current account — GET /api/auth/me
+Successful registration/login returns a signed JWT, expiry duration, and safe user summary. Password hashes are never returned.
+
+### Current user — GET /api/auth/me
 Send `Authorization: Bearer <token>`.
 
-## Role authorization
+## Authorization
 - `/api/student/**` requires STUDENT.
 - `/api/recruiter/**` requires RECRUITER.
 - `/api/admin/**` requires ADMIN.
-- Public registration only accepts STUDENT and RECRUITER. Admin accounts must be provisioned through a controlled process.
+- Public registration accepts STUDENT and RECRUITER only. Admin accounts must be provisioned through a controlled process.
 
-## Security status
-Passwords use BCrypt and API authentication is stateless with signed JWTs. Before public deployment, add email verification, password recovery, rate limiting, HTTPS, secure secret storage, and operational monitoring. The JWT secret fallback is for local development only.
+## Security and remaining work
+- Passwords are hashed using BCrypt.
+- JWT request authentication is stateless.
+- Frontend CORS currently allows local Vite origins only.
+- Add email verification, password reset, rate limiting, HTTPS, secure secret storage, and monitoring before public deployment.
+- Jobs, applications, interviews, and placement analytics endpoints are not implemented yet.
+- Local compilation and API integration tests are still pending.
