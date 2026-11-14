@@ -113,7 +113,7 @@ Then run:
 docker compose up --build -d
 ```
 
-Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded resumes are stored in named Docker volumes. Back up these volumes before upgrades or migration.
+Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded resumes are stored in named Docker volumes. Back up these volumes before upgrades or migration. Nginx adds baseline browser security headers, applies an edge rate limit to login/registration, and permits the configured 5 MB resume uploads. The Compose stack serves HTTP; put it behind a TLS-terminating reverse proxy before exposing it publicly.
 
 ## Development log
 
