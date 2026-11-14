@@ -64,9 +64,11 @@ public class StudentProfile {
         graduationYear = request.graduationYear();
         degree = clean(request.degree());
         branch = clean(request.branch());
-        skills = request.skills() == null ? new HashSet<>() :
+        skills.clear();
+        if (request.skills() != null) {
             request.skills().stream().filter(s -> s != null && !s.isBlank())
-                .map(String::trim).collect(java.util.stream.Collectors.toCollection(HashSet::new));
+                .map(String::trim).forEach(skills::add);
+        }
         resumeUrl = clean(request.resumeUrl());
     }
 
