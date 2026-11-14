@@ -15,6 +15,7 @@ public class User {
  @Column(length=100) private String department;
  @Column(length=150) private String companyName;
  @Column(length=255) private String companyWebsite;
+ @Column(nullable=false) private boolean companyVerified=false;
  @Column(nullable=false,updatable=false) private Instant createdAt;
  protected User() {}
  public User(String fullName,String email,String password,Role role) {
@@ -25,9 +26,10 @@ public class User {
  public String getEmail(){return email;} public String getPassword(){return password;}
  public Role getRole(){return role;} public String getEnrollmentNumber(){return enrollmentNumber;}
  public String getDepartment(){return department;} public String getCompanyName(){return companyName;}
- public String getCompanyWebsite(){return companyWebsite;} public Instant getCreatedAt(){return createdAt;}
+ public String getCompanyWebsite(){return companyWebsite;} public boolean isCompanyVerified(){return companyVerified;} public Instant getCreatedAt(){return createdAt;}
  public void setEnrollmentNumber(String v){enrollmentNumber=v;}
  public void setDepartment(String v){department=v;}
  public void setCompanyName(String v){companyName=v;}
  public void setCompanyWebsite(String v){companyWebsite=v;}
+ public void setCompanyVerified(boolean v){companyVerified=v;}
 }
