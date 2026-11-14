@@ -63,8 +63,18 @@ function Dashboard({role}) {
  return <><PageHeading eyebrow="YOUR OVERVIEW" title={isStudent?'Good evening, Rishi 👋':isRecruiter?'Welcome back, Rishi':'Placement overview'} description={isStudent?'Here’s what’s happening with your placement journey.':isRecruiter?'Here’s the latest activity across your hiring pipeline.':'A live snapshot of your campus placement ecosystem.'} action={<Button to={isStudent?'/jobs':isRecruiter?'/post-job':'/analytics'}><Plus size={16}/>{isStudent?'Explore jobs':isRecruiter?'Post a job':'View analytics'}</Button>}/><div className="stat-grid">{stats.map(([label,value,change,Icon,color])=><StatCard key={label} {...{label,value,change,Icon,color}}/>)}</div><div className="dashboard-grid"><section className="panel chart-panel"><div className="panel-heading"><div><h3>{isStudent?'Application activity':isRecruiter?'Hiring activity':'Placement activity'}</h3><p>{isStudent?'Your application progress over time':'Performance overview for the last 6 months'}</p></div><button className="select-pill">Last 6 months <ChevronDown size={13}/></button></div><div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><AreaChart data={activity}><defs><linearGradient id="appsFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2563eb" stopOpacity={.18}/><stop offset="100%" stopColor="#2563eb" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#edf1f6"/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'#94a3b8',fontSize:12}}/><YAxis axisLine={false} tickLine={false} tick={{fill:'#94a3b8',fontSize:12}}/><Tooltip/><Area type="monotone" dataKey="apps" stroke="#2563eb" strokeWidth={2.5} fill="url(#appsFill)"/><Area type="monotone" dataKey="selected" stroke="#8b5cf6" strokeWidth={2} fill="transparent"/></AreaChart></ResponsiveContainer></div><div className="chart-legend"><span><i className="legend-blue"/>Applications</span><span><i className="legend-purple"/>Shortlisted / selected</span></div></section><section className="panel profile-panel"><div className="panel-heading"><div><h3>{isStudent?'Profile strength':'Workspace health'}</h3><p>{isStudent?'Make your profile stand out':'Keep your hiring workspace up to date'}</p></div><MoreHorizontal size={19}/></div><div className="profile-score"><div className="score-ring"><div><strong>{isStudent?'86':'92'}%</strong><small>complete</small></div></div></div><div className="profile-todo"><div><CheckCircle2 size={16}/><span>Basic information</span><b>Done</b></div><div><CheckCircle2 size={16}/><span>{isStudent?'Education details':'Company profile'}</span><b>Done</b></div><div><Clock3 size={16}/><span>{isStudent?'Add your projects':'Review job descriptions'}</span><b className="todo-pending">Pending</b></div></div><Link className="text-link" to="/profile">Complete your profile <ArrowRight size={15}/></Link></section></div><div className="panel table-panel"><div className="panel-heading"><div><h3>{isStudent?'Recent applications':isRecruiter?'Recent applicants':'Recent placement activity'}</h3><p>Stay up to date with the latest progress</p></div><Link to="/applications" className="text-link">View all <ArrowRight size={15}/></Link></div><div className="table-scroll"><table><thead><tr><th>{isStudent?'COMPANY':'CANDIDATE / COMPANY'}</th><th>ROLE</th><th>APPLIED ON</th><th>STATUS</th><th/></tr></thead><tbody>{demoApplications.map((a,i)=><tr key={a.company}><td><div className="company-cell"><b className={`company-logo logo-${i}`}>{a.company[0]}</b><strong>{a.company}</strong></div></td><td>{a.role}</td><td>{a.date}</td><td><span className={`status-badge ${a.tone}`}>{a.status}</span></td><td><button className="more-btn"><MoreHorizontal size={18}/></button></td></tr>)}</tbody></table></div></div></>
 }
 
-function JobCard({job,onApply,applied=false,applying=false,allowApply=true}) { const [saved,setSaved]=useState(false);return <motion.article className="job-card" whileHover={{y:-4}}><div className="job-card-top"><div className="company-identity"><span className="company-logo large" style={{background:job.color}}>{job.logo}</span><div><strong>{job.company}</strong><small>{String(job.type||'Role').replaceAll('_',' ')} · Approved posting</small></div></div><button className={saved?'save-btn saved':'save-btn'} onClick={()=>setSaved(!saved)} aria-label="Save job"><Bookmark size={18} fill={saved?'currentColor':'none'}/></button></div><h3>{job.role}</h3><div className="job-meta"><span><MapPin size={14}/>{job.place}</span><span><IndianRupee size={14}/>{job.salary}</span></div><div className="job-tags">{job.skills.map(s=><span key={s}>{s}</span>)}</div><div className="job-card-bottom"><div><span className="match-score"><Sparkles size={13}/>{job.match>0?job.match+'% match':'Approved listing'}</span><small>{job.days} · CGPA {job.cgpa}</small></div>{allowApply?<button className="btn btn-primary" disabled={applied||applying} onClick={()=>onApply(job)}>{applying?"Applying...":applied?"Applied":"Apply now"} <ArrowRight size={14}/></button>:<Button onClick={()=>onApply(job)} variant="outline">View details <ArrowRight size={14}/></Button>}</div></motion.article> }
-function JobsPage({title='Find your next opportunity',allowApply=true}) {
+function JobCard({job,onApply,applied=false,applying=false,allowApply=true}) {
+ const [saved,setSaved]=useState(false)
+ return <motion.article className="job-card" whileHover={{y:-4}}>
+  <div className="job-card-top"><div className="company-identity"><span className="company-logo large" style={{background:job.color}}>{job.logo}</span><div><strong>{job.company}</strong><small>{String(job.type||'Role').replaceAll('_',' ')} · Approved posting</small></div></div><button className={saved?'save-btn saved':'save-btn'} onClick={()=>setSaved(!saved)} aria-label="Save job"><Bookmark size={18} fill={saved?'currentColor':'none'}/></button></div>
+  <h3>{job.role}</h3>
+  <div className="job-meta"><span><MapPin size={14}/>{job.place}</span><span><IndianRupee size={14}/>{job.salary}</span></div>
+  <div className="job-tags">{job.skills.map(s=><span key={s}>{s}</span>)}</div>
+  {job.recommended&&<div className="match-explanation"><span className={job.eligible?'eligibility-pill eligible':'eligibility-pill not-eligible'}>{job.eligible?'Eligible':'Not eligible yet'}</span><p>{(job.reasons||[]).join(' ')}</p></div>}
+  <div className="job-card-bottom"><div><span className="match-score"><Sparkles size={13}/>{job.recommended?job.match+'% match':job.match>0?job.match+'% match':'Approved listing'}</span><small>{job.days} · CGPA {job.cgpa}</small></div>{allowApply?<button className="btn btn-primary" disabled={applied||applying} onClick={()=>onApply(job)}>{applying?"Applying...":applied?"Applied":"Apply now"} <ArrowRight size={14}/></button>:<Button onClick={()=>onApply(job)} variant="outline">View details <ArrowRight size={14}/></Button>}</div>
+ </motion.article>
+}
+function JobsPage({title='Find your next opportunity',allowApply=true,recommended=false}) {
  const [query,setQuery]=useState('')
  const [filter,setFilter]=useState('All')
  const [jobs,setJobs]=useState([])
@@ -76,31 +86,33 @@ function JobsPage({title='Find your next opportunity',allowApply=true}) {
  useEffect(()=>{
   let active=true
   setLoading(true);setError('')
-  jobApi.browse({q:query.trim()||undefined,type:filter==='All'?undefined:filter})
-   .then(response=>{
-    if(!active)return
-    setJobs(response.data.map(job=>({
-     id:job.id,company:job.companyName,role:job.title,place:job.location,
-     salary:job.salaryMin!=null&&job.salaryMax!=null?'₹'+Number(job.salaryMin).toLocaleString('en-IN')+'–₹'+Number(job.salaryMax).toLocaleString('en-IN'):job.salaryMax!=null?'Up to ₹'+Number(job.salaryMax).toLocaleString('en-IN'):job.salaryMin!=null?'From ₹'+Number(job.salaryMin).toLocaleString('en-IN'):'Not disclosed',
-     cgpa:job.minCgpa!=null?job.minCgpa+'+':'Not specified',
-     skills:job.requiredSkills||[],days:job.deadline?'Apply by '+job.deadline:'Open until filled',
-     color:'#2563eb',logo:(job.companyName||'P').charAt(0).toUpperCase(),match:0,type:job.employmentType,description:job.description
-    })))
-   })
-   .catch(err=>{if(active)setError(err.response?.data?.message||'Unable to load jobs. Check that the backend is running.')})
+  const request=recommended?profileApi.matches():jobApi.browse({q:query.trim()||undefined,type:filter==='All'?undefined:filter})
+  request.then(response=>{
+   if(!active)return
+   const rows=recommended?response.data.map(item=>({...item.job,eligible:item.eligible,matchPercentage:item.matchPercentage,reasons:item.reasons})):response.data
+   const mapped=rows.map(job=>({
+    id:job.id,company:job.companyName,role:job.title,place:job.location,
+    salary:job.salaryMin!=null&&job.salaryMax!=null?'₹'+Number(job.salaryMin).toLocaleString('en-IN')+'–₹'+Number(job.salaryMax).toLocaleString('en-IN'):job.salaryMax!=null?'Up to ₹'+Number(job.salaryMax).toLocaleString('en-IN'):job.salaryMin!=null?'From ₹'+Number(job.salaryMin).toLocaleString('en-IN'):'Not disclosed',
+    cgpa:job.minCgpa!=null?job.minCgpa+'+':'Not specified',
+    skills:job.requiredSkills||[],days:job.deadline?'Apply by '+job.deadline:'Open until filled',
+    color:'#2563eb',logo:(job.companyName||'P').charAt(0).toUpperCase(),
+    match:recommended?job.matchPercentage:0,type:job.employmentType,description:job.description,
+    recommended,eligible:job.eligible,reasons:job.reasons
+   }))
+   setJobs(recommended?mapped.filter(job=>(filter==='All'||String(job.type).toUpperCase().replaceAll('-','_')===filter.toUpperCase().replaceAll('-','_'))&&(!query||[job.role,job.company,...job.skills].join(' ').toLowerCase().includes(query.toLowerCase()))):mapped)
+  }).catch(err=>{if(active)setError(err.response?.data?.message||'Unable to load jobs. Check that the backend is running.')})
    .finally(()=>{if(active)setLoading(false)})
   return ()=>{active=false}
- },[query,filter])
+ },[query,filter,recommended])
  useEffect(()=>{if(!allowApply)return;let active=true;jobApi.myApplications().then(r=>{if(active)setAppliedIds(new Set(r.data.map(a=>a.jobId)))}).catch(()=>{});return()=>{active=false}},[allowApply])
  const viewDetails=job=>{setToast(job.role+' at '+job.company+': '+job.description);setTimeout(()=>setToast(''),6000)}
- const applyToJob=async job=>{setApplyingId(job.id);setToast('');try{await jobApi.apply(job.id);setAppliedIds(current=>new Set([...current,job.id]));setToast('Application submitted for '+job.role+' at '+job.company+'.')}catch(err){setToast(err.response?.data?.message||'Could not submit application. Please try again.')}finally{setApplyingId(null)} }
- return <><PageHeading eyebrow="OPPORTUNITIES" title={title} description="Browse approved openings published by verified recruiters."/><div className="job-toolbar"><div className="search-field"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search roles, companies or skills..."/></div><div className="filter-buttons"><SlidersHorizontal size={17}/>{['All','Full-time','Internship'].map(f=><button key={f} className={filter===f?'filter-active':''} onClick={()=>setFilter(f)}>{f}</button>)}</div></div><div className="results-line"><span><b>{jobs.length} opportunities</b> currently available</span></div>
- {loading&&<div className="empty-state"><p>Loading approved opportunities...</p></div>}
+ const applyToJob=async job=>{setApplyingId(job.id);setToast('');try{await jobApi.apply(job.id);setAppliedIds(current=>new Set([...current,job.id]));setToast('Application submitted for '+job.role+' at '+job.company+'.')}catch(err){setToast(err.response?.data?.message||'Could not submit application. Please try again.')}finally{setApplyingId(null)}}
+ return <><PageHeading eyebrow={recommended?'PERSONALIZED FOR YOU':'OPPORTUNITIES'} title={title} description={recommended?'Compare your CGPA and skills with each recruiter’s requirements.':'Browse approved openings published by recruiters.'}/><div className="job-toolbar"><div className="search-field"><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search roles, companies or skills..."/></div><div className="filter-buttons"><SlidersHorizontal size={17}/>{['All','Full-time','Internship'].map(f=><button key={f} className={filter===f?'filter-active':''} onClick={()=>setFilter(f)}>{f}</button>)}</div></div><div className="results-line"><span><b>{jobs.length} opportunities</b> currently available</span></div>
+ {loading&&<div className="empty-state"><p>Loading {recommended?'your job matches':'approved opportunities'}...</p></div>}
  {error&&!loading&&<div className="empty-state"><CircleX size={28}/><h3>Could not load jobs</h3><p>{error}</p></div>}
- {!loading&&!error&&<><div className="jobs-grid">{jobs.map(job=><JobCard key={job.id} job={job} onApply={allowApply?applyToJob:viewDetails} applied={appliedIds.has(job.id)} applying={applyingId===job.id} allowApply={allowApply}/>)}</div>{jobs.length===0&&<div className="empty-state"><Search size={28}/><h3>No approved roles found</h3><p>Try another keyword or check back later for new openings.</p></div>}</>}
+ {!loading&&!error&&<><div className="jobs-grid">{jobs.map(job=><JobCard key={job.id} job={job} onApply={allowApply?applyToJob:viewDetails} applied={appliedIds.has(job.id)} applying={applyingId===job.id} allowApply={allowApply}/>)}</div>{jobs.length===0&&<div className="empty-state"><Search size={28}/><h3>No matching roles found</h3><p>{recommended?'Complete your profile or adjust your search to see more matches.':'Try another keyword or check back later for new openings.'}</p></div>}</>}
  {toast&&<div className="toast" role="status">{toast}</div>}</>
 }
-
 function Applications(){return <><PageHeading eyebrow="YOUR JOURNEY" title="My applications" description="Every opportunity, every update, all in one place."/><div className="panel table-panel"><div className="panel-heading"><div><h3>Application tracker</h3><p>Follow your progress from application to outcome</p></div><span className="status-badge blue">12 total applications</span></div><div className="table-scroll"><table><thead><tr><th>COMPANY</th><th>POSITION</th><th>APPLIED</th><th>STATUS</th><th>NEXT STEP</th></tr></thead><tbody>{demoApplications.map((a,i)=><tr key={a.company}><td><div className="company-cell"><b className={`company-logo logo-${i}`}>{a.company[0]}</b><strong>{a.company}</strong></div></td><td>{a.role}</td><td>{a.date}</td><td><span className={`status-badge ${a.tone}`}>{a.status}</span></td><td><button className="text-link">View details <ArrowRight size={14}/></button></td></tr>)}</tbody></table></div></div><div className="panel timeline-panel"><h3>Application journey</h3><div className="timeline"><span className="timeline-done">Applied</span><i/><span className="timeline-done">Under review</span><i/><span className="timeline-current">Shortlisted</span><i/><span>Interview</span><i/><span>Outcome</span></div></div></>}
 function Profile(){
  const [profile,setProfile]=useState(null)
@@ -256,7 +268,7 @@ export default function App(){
   <Route path="*" element={auth.token?<DashboardLayout role={role} onLogout={logout}><Routes>
    <Route path="/dashboard" element={<Dashboard role={role}/>}/>
    <Route path="/jobs" element={role === "Recruiter" ? <RecruiterJobsPage/> : <JobsPage allowApply={role === "Student"}/>}/>
-   <Route path="/recommended" element={<JobsPage title="Recommended for you" allowApply={role === "Student"}/>}/>
+   <Route path="/recommended" element={<JobsPage title="Recommended for you" allowApply={role === "Student"} recommended={role === "Student"}/>}/>
    <Route path="/applications" element={role === "Student" ? <StudentApplicationsPage/> : <GenericPage title="Applications" description="Application tracking is available in the student workspace." icon={FileText}/>}/>
    <Route path="/profile" element={<Profile/>}/>
    <Route path="/post-job" element={<PostJobPage/>}/>
