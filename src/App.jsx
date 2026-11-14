@@ -10,7 +10,7 @@ import {
   CircleX, Send, ExternalLink, Zap, Award, BookOpen, MessageSquare
 } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from 'recharts'
-import { authApi, jobApi, profileApi, resumeApi, notificationApi } from './services/api.js'
+import { authApi, jobApi, profileApi, resumeApi, notificationApi, adminApi, interviewApi } from './services/api.js'
 import { RecruiterJobsPage, PostJobPage, JobApprovalsPage } from './pages/JobManagement.jsx'
 import { StudentApplicationsPage, RecruiterApplicantsPage } from './pages/ApplicationPages.jsx'
 import { InterviewPage, NotificationsPage, AdminStudentsPage, AdminRecruitersPage, AdminCompaniesPage, AdminAnalyticsPage, AdminReportsPage } from './pages/WorkspacePages.jsx'
@@ -61,10 +61,57 @@ function PageHeading({eyebrow,title,description,action}) { return <div className
 function StatCard({label,value,change,Icon,color}) { return <motion.div className="stat-card" whileHover={{y:-3}}><div className="stat-top"><span>{label}</span><i className={`stat-icon ${color}`}><Icon size={19}/></i></div><div className="stat-value">{value}</div><div className="stat-foot"><span className="stat-change"><ArrowUpRight size={13}/>{change}</span><span>vs last month</span></div></motion.div> }
 function Dashboard({role}) {
  const isStudent=role==='Student', isRecruiter=role==='Recruiter'
- const stats=isStudent?[['Available jobs','128','+12%',BriefcaseBusiness,'blue'],['Eligible jobs','24','+8%',Target,'purple'],['Applications sent','12','+3%',Send,'orange'],['Shortlisted','04','+2',Award,'green']]:isRecruiter?[['Active jobs','08','+2',BriefcaseBusiness,'blue'],['Total applicants','246','+18%',Users,'purple'],['Shortlisted','32','+6',Award,'green'],['Interviews','14','+4',CalendarDays,'orange']]:[['Total students','2,840','+8%',GraduationCap,'blue'],['Recruiters','186','+12%',Users,'purple'],['Active companies','94','+6',Building2,'green'],['Placement rate','78.4%','+5.2%',TrendingUp,'orange']]
- return <><PageHeading eyebrow="YOUR OVERVIEW" title={isStudent?'Good evening, Rishi 👋':isRecruiter?'Welcome back, Rishi':'Placement overview'} description={isStudent?'Here’s what’s happening with your placement journey.':isRecruiter?'Here’s the latest activity across your hiring pipeline.':'A live snapshot of your campus placement ecosystem.'} action={<Button to={isStudent?'/jobs':isRecruiter?'/post-job':'/analytics'}><Plus size={16}/>{isStudent?'Explore jobs':isRecruiter?'Post a job':'View analytics'}</Button>}/><div className="stat-grid">{stats.map(([label,value,change,Icon,color])=><StatCard key={label} {...{label,value,change,Icon,color}}/>)}</div><div className="dashboard-grid"><section className="panel chart-panel"><div className="panel-heading"><div><h3>{isStudent?'Application activity':isRecruiter?'Hiring activity':'Placement activity'}</h3><p>{isStudent?'Your application progress over time':'Performance overview for the last 6 months'}</p></div><button className="select-pill">Last 6 months <ChevronDown size={13}/></button></div><div className="chart-wrap"><ResponsiveContainer width="100%" height="100%"><AreaChart data={activity}><defs><linearGradient id="appsFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#2563eb" stopOpacity={.18}/><stop offset="100%" stopColor="#2563eb" stopOpacity={0}/></linearGradient></defs><CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#edf1f6"/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'#94a3b8',fontSize:12}}/><YAxis axisLine={false} tickLine={false} tick={{fill:'#94a3b8',fontSize:12}}/><Tooltip/><Area type="monotone" dataKey="apps" stroke="#2563eb" strokeWidth={2.5} fill="url(#appsFill)"/><Area type="monotone" dataKey="selected" stroke="#8b5cf6" strokeWidth={2} fill="transparent"/></AreaChart></ResponsiveContainer></div><div className="chart-legend"><span><i className="legend-blue"/>Applications</span><span><i className="legend-purple"/>Shortlisted / selected</span></div></section><section className="panel profile-panel"><div className="panel-heading"><div><h3>{isStudent?'Profile strength':'Workspace health'}</h3><p>{isStudent?'Make your profile stand out':'Keep your hiring workspace up to date'}</p></div><MoreHorizontal size={19}/></div><div className="profile-score"><div className="score-ring"><div><strong>{isStudent?'86':'92'}%</strong><small>complete</small></div></div></div><div className="profile-todo"><div><CheckCircle2 size={16}/><span>Basic information</span><b>Done</b></div><div><CheckCircle2 size={16}/><span>{isStudent?'Education details':'Company profile'}</span><b>Done</b></div><div><Clock3 size={16}/><span>{isStudent?'Add your projects':'Review job descriptions'}</span><b className="todo-pending">Pending</b></div></div><Link className="text-link" to="/profile">Complete your profile <ArrowRight size={15}/></Link></section></div><div className="panel table-panel"><div className="panel-heading"><div><h3>{isStudent?'Recent applications':isRecruiter?'Recent applicants':'Recent placement activity'}</h3><p>Stay up to date with the latest progress</p></div><Link to="/applications" className="text-link">View all <ArrowRight size={15}/></Link></div><div className="table-scroll"><table><thead><tr><th>{isStudent?'COMPANY':'CANDIDATE / COMPANY'}</th><th>ROLE</th><th>APPLIED ON</th><th>STATUS</th><th/></tr></thead><tbody>{demoApplications.map((a,i)=><tr key={a.company}><td><div className="company-cell"><b className={`company-logo logo-${i}`}>{a.company[0]}</b><strong>{a.company}</strong></div></td><td>{a.role}</td><td>{a.date}</td><td><span className={`status-badge ${a.tone}`}>{a.status}</span></td><td><button className="more-btn"><MoreHorizontal size={18}/></button></td></tr>)}</tbody></table></div></div></>
+ const [stats,setStats]=useState([])
+ const [recent,setRecent]=useState([])
+ const [loading,setLoading]=useState(true)
+ const [error,setError]=useState('')
+ useEffect(()=>{
+  let active=true
+  const load=async()=>{
+   setLoading(true);setError('')
+   try{
+    if(isStudent){
+     const [jobs,applications,matches,interviews]=await Promise.all([jobApi.browse(),jobApi.myApplications(),profileApi.matches(),interviewApi.student()])
+     const apps=applications.data
+     if(active){
+      setStats([['Available jobs',jobs.data.length,BriefcaseBusiness,'blue'],['Eligible jobs',matches.data.filter(x=>x.eligible).length,Target,'purple'],['Applications sent',apps.length,Send,'orange'],['Shortlisted',apps.filter(x=>x.status==='SHORTLISTED').length,Award,'green']])
+      setRecent(apps.slice(0,5).map(x=>({id:x.id,company:x.companyName,role:x.jobTitle,date:x.appliedAt,status:x.status})))
+     }
+    }else if(isRecruiter){
+     const [jobs,interviews]=await Promise.all([jobApi.mine(),interviewApi.recruiter()])
+     const groups=await Promise.all(jobs.data.map(async job=>({job,applicants:(await jobApi.applicants(job.id)).data})))
+     const applicants=groups.flatMap(g=>g.applicants.map(a=>({...a,jobTitle:g.job.title,companyName:g.job.companyName}))).sort((x,y)=>new Date(y.appliedAt)-new Date(x.appliedAt))
+     if(active){
+      setStats([['Active jobs',jobs.data.filter(j=>j.status==='APPROVED').length,BriefcaseBusiness,'blue'],['Total applicants',applicants.length,Users,'purple'],['Shortlisted',applicants.filter(x=>x.status==='SHORTLISTED').length,Award,'green'],['Interviews',interviews.data.filter(x=>x.status==='SCHEDULED').length,CalendarDays,'orange']])
+      setRecent(applicants.slice(0,5).map(x=>({id:x.id,company:x.studentName,role:x.jobTitle,date:x.appliedAt,status:x.status})))
+     }
+    }else{
+     const [overview,applications]=await Promise.all([adminApi.overview(),adminApi.applications()])
+     const d=overview.data
+     if(active){
+      setStats([['Total students',d.students,GraduationCap,'blue'],['Recruiters',d.recruiters,Users,'purple'],['Companies',d.companies,Building2,'green'],['Pending jobs',d.jobsPending,ShieldCheck,'orange']])
+      setRecent(applications.data.slice(0,5).map(x=>({id:x.id,company:x.studentName,role:x.companyName+' · '+x.jobTitle,date:x.appliedAt,status:x.status})))
+     }
+    }
+   }catch(e){if(active)setError(e.response?.data?.message||'Unable to load live dashboard data. Check your API connection and permissions.')}
+   finally{if(active)setLoading(false)}
+  }
+  load()
+  return()=>{active=false}
+ },[role])
+ const date=value=>value?new Date(value).toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'—'
+ const tone=status=>({APPLIED:'blue',UNDER_REVIEW:'purple',SHORTLISTED:'green',REJECTED:'red',HIRED:'green'}[status]||'blue')
+ return <>
+  <PageHeading eyebrow="YOUR OVERVIEW" title={isStudent?'Your placement journey':isRecruiter?'Recruiter workspace':'Placement overview'} description={isStudent?'A live view of your opportunities and application progress.':isRecruiter?'A live view of your job postings, applicants, and interviews.':'Live counts across students, recruiters, jobs, and applications.'} action={<Button to={isStudent?'/jobs':isRecruiter?'/post-job':'/analytics'}><Plus size={16}/>{isStudent?'Explore jobs':isRecruiter?'Post a job':'View analytics'}</Button>}/>
+  {error&&<div className="auth-error">{error}</div>}
+  {loading?<div className="panel empty-state">Loading live workspace data...</div>:<>
+   <div className="stat-grid">{stats.map(([label,value,Icon,color])=><div className="stat-card" key={label}><div className="stat-top"><span>{label}</span><i className={'stat-icon '+color}><Icon size={19}/></i></div><div className="stat-value">{value}</div><div className="stat-foot"><span className="stat-change"><CheckCircle2 size={13}/>Live</span><span>from PlaceMate API</span></div></div>)}</div>
+   <div className="panel table-panel dashboard-live-table"><div className="panel-heading"><div><h3>{isStudent?'Recent applications':isRecruiter?'Recent applicants':'Recent placement activity'}</h3><p>Latest records from your PlaceMate workspace</p></div><Link to={isStudent?'/applications':isRecruiter?'/applicants':'/reports'} className="text-link">View all <ArrowRight size={15}/></Link></div>
+    {recent.length===0?<div className="empty-state"><FileText size={26}/><h3>No recent activity</h3><p>{isStudent?'Apply to an approved job to start tracking your progress.':isRecruiter?'New applications to your approved jobs will appear here.':'Placement activity will appear as students apply and recruiters update applications.'}</p></div>:<div className="table-scroll"><table><thead><tr><th>{isStudent?'COMPANY':isRecruiter?'CANDIDATE':'STUDENT'}</th><th>{isStudent?'POSITION':isRecruiter?'JOB':'COMPANY / POSITION'}</th><th>DATE</th><th>STATUS</th></tr></thead><tbody>{recent.map(row=><tr key={row.id}><td><div className="company-cell"><b className="company-logo">{(row.company||'P').charAt(0).toUpperCase()}</b><strong>{row.company}</strong></div></td><td>{row.role}</td><td>{date(row.date)}</td><td><span className={'status-badge '+tone(row.status)}>{String(row.status||'').replaceAll('_',' ')}</span></td></tr>)}</tbody></table></div>}
+   </div>
+  </>}
+ </>
 }
-
 function JobCard({job,onApply,applied=false,applying=false,allowApply=true}) {
  const [saved,setSaved]=useState(false)
  return <motion.article className="job-card" whileHover={{y:-4}}>
