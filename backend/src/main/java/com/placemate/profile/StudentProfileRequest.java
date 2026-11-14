@@ -10,5 +10,5 @@ public record StudentProfileRequest(
     @Size(max = 120) String degree,
     @Size(max = 120) String branch,
     @Size(max = 40) Set<@NotBlank @Size(max = 60) String> skills,
-    @Size(max = 500) @Pattern(regexp = "^(https?://\\\\S+|[0-9]+-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\\\.(pdf|doc|docx))?$", message = "Provide an http(s) resume link or a PlaceMate-uploaded resume key.") String resumeUrl
+    @Size(max = 500) @Pattern(regexp = "^(https?://\\S+|[0-9]+-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.(pdf|doc|docx))?$", message = "Provide an http(s) resume link or a PlaceMate-uploaded resume key.") String resumeUrl
 ) {}
