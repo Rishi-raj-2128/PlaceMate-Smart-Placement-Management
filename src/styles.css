@@ -198,3 +198,38 @@
   .applicant-filter > div { padding: 0; }
   .applicant-actions { grid-template-columns: 1fr; }
 }
+
+
+/* Student profile editor and personalized eligibility explanations */
+.student-profile-form { padding: 22px; }
+.student-profile-form .panel-heading { margin-bottom: 18px; }
+.student-profile-form .panel-heading h3 { margin: 0 0 5px; color: #172033; }
+.student-profile-form .panel-heading p { margin: 0; color: #64748b; font-size: 12px; }
+.student-profile-form .panel-heading > svg { color: #2563eb; }
+.student-profile-form .form-label { margin: 0; }
+.match-explanation {
+  padding: 11px 12px;
+  margin: 12px 0 14px;
+  border: 1px solid #e8edf5;
+  border-radius: 9px;
+  background: #f8fafc;
+}
+.match-explanation p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.eligibility-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 800;
+}
+.eligibility-pill.eligible { color: #15803d; background: #dcfce7; }
+.eligibility-pill.not-eligible { color: #b45309; background: #fef3c7; }
+@media(max-width:760px) {
+  .student-profile-form { padding: 16px; }
+}
