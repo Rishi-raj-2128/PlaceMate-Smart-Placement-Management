@@ -37,6 +37,10 @@ export const jobApi = {
   remove: (id) => api.delete(`/recruiter/jobs/${id}`),
   pending: () => api.get('/admin/jobs/pending'),
   review: (id, payload) => api.patch(`/admin/jobs/${id}/review`, payload),
+  apply: (jobId) => api.post(`/student/jobs/${jobId}/applications`),
+  myApplications: () => api.get('/student/applications'),
+  applicants: (jobId) => api.get(`/recruiter/jobs/${jobId}/applications`),
+  updateApplicationStatus: (applicationId, payload) => api.patch(`/recruiter/applications/${applicationId}/status`, payload),
 }
 
 export default api
