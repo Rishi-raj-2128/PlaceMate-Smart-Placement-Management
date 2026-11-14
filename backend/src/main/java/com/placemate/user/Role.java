@@ -1,7 +1,2 @@
 package com.placemate.user;
-
-public enum Role {
-    STUDENT,
-    RECRUITER,
-    ADMIN
-}
+public enum Role { STUDENT, RECRUITER, ADMIN }
