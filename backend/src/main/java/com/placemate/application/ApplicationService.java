@@ -41,7 +41,7 @@ public class ApplicationService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You have already applied for this job.");
         }
         try {
-            return ApplicationResponse.from(applications.save(new Application(student, job)));
+            return ApplicationResponse.from(applications.saveAndFlush(new Application(student, job)));
         } catch (DataIntegrityViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You have already applied for this job.");
         }
@@ -62,7 +62,7 @@ public class ApplicationService {
         if (!job.getCreatedBy().getId().equals(recruiter.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only view applicants for your own jobs.");
         }
-        return applications.findByJobIdAndJobCreatedByIdOrderByAppliedAtDesc(jobId, recruiter.getId())
+        return applications.findByJob_IdAndJob_CreatedBy_IdOrderByAppliedAtDesc(jobId, recruiter.getId())
             .stream().map(ApplicationResponse::from).toList();
     }
 
