@@ -18,7 +18,6 @@ import com.placemate.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -35,7 +34,12 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = ResumeApiIntegrationTest.UploadDirectoryInitializer.class)
 class ResumeApiIntegrationTest {
-    @TempDir static Path uploadDir;
+    private static final Path uploadDir = createUploadDirectory();
+
+    private static Path createUploadDirectory() {
+        try { return Files.createTempDirectory("placemate-resume-api-"); }
+        catch (java.io.IOException ex) { throw new ExceptionInInitializerError(ex); }
+    }
 
     static class UploadDirectoryInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
