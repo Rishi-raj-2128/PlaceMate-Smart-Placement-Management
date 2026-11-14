@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from 'recharts'
 import { authApi, jobApi } from './services/api.js'
+import { RecruiterJobsPage, PostJobPage, JobApprovalsPage } from './pages/JobManagement.jsx'
 
 const jobs = [
   { id: 1, company: 'Microsoft', role: 'Software Engineer', place: 'Bengaluru · Hybrid', salary: '₹18–24 LPA', cgpa: '7.5+', skills: ['Java', 'DSA', 'OOP'], days: '3 days left', color: '#2563eb', logo: 'M', match: 96, type: 'Full-time' },
@@ -190,17 +191,17 @@ export default function App(){
   <Route path="/register" element={auth.token?<Navigate to="/dashboard" replace/>:<Login register onAuthenticated={handleAuthenticated}/>}/>
   <Route path="*" element={auth.token?<DashboardLayout role={role} onLogout={logout}><Routes>
    <Route path="/dashboard" element={<Dashboard role={role}/>}/>
-   <Route path="/jobs" element={<JobsPage/>}/>
+   <Route path="/jobs" element={role === "Recruiter" ? <RecruiterJobsPage/> : <JobsPage/>}/>
    <Route path="/recommended" element={<JobsPage title="Recommended for you"/>}/>
    <Route path="/applications" element={<Applications/>}/>
    <Route path="/profile" element={<Profile/>}/>
-   <Route path="/post-job" element={<GenericPage title="Post a job" description="Create a new opportunity and reach eligible candidates." icon={Plus}/>}/>
+   <Route path="/post-job" element={<PostJobPage/>}/>
    <Route path="/applicants" element={<GenericPage title="Applicants" description="Review candidates and manage your hiring pipeline." icon={Users}/>}/>
    <Route path="/interviews" element={<GenericPage title="Interviews" description="Keep every interview schedule and update organized." icon={CalendarDays}/>}/>
    <Route path="/students" element={<GenericPage title="Students" description="Manage student profiles and placement readiness." icon={GraduationCap}/>}/>
    <Route path="/recruiters" element={<GenericPage title="Recruiters" description="Manage recruiter access and activity." icon={Users}/>}/>
    <Route path="/companies" element={<GenericPage title="Companies" description="Manage organizations participating in campus placements." icon={Building2}/>}/>
-   <Route path="/approvals" element={<GenericPage title="Job approvals" description="Review and approve opportunities before they go live." icon={ShieldCheck}/>}/>
+   <Route path="/approvals" element={<JobApprovalsPage/>}/>
    <Route path="/analytics" element={<GenericPage title="Placement analytics" description="Explore placement performance across departments and drives." icon={ChartNoAxesCombined}/>}/>
    <Route path="/reports" element={<GenericPage title="Reports" description="Create and review placement reports." icon={FileText}/>}/>
    <Route path="*" element={<Navigate to="/dashboard" replace/>}/>
