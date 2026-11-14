@@ -115,7 +115,17 @@ Example status update body:
 
 Student-facing application history includes the job, company, applied date, current status and recruiter note. 
 
-## Student profile and eligibility API\n\n- GET /api/student/profile — return the authenticated student's academic profile (creates an empty profile record when needed).\n- PUT /api/student/profile — update CGPA, graduation year, degree, branch, skills, and a resume URL.\n- GET /api/student/jobs/matches — return approved, non-expired jobs with eligibility and match explanations.\n\nThe eligibility rule checks the job's minimum CGPA and whether every required skill is present in the student's profile (case-insensitive skill-name comparison). The match percentage is a transparent rule-based score: 50% CGPA requirement score and 50% required-skill coverage score. If a job has no CGPA or skill requirement, that criterion receives full credit. Missing profile information is treated as unknown/not satisfied for eligibility and is called out in the explanation; it is not guessed. This is a deterministic MVP rule, not an AI prediction.\n\nThe profile stores a resume URL; secure file upload and recruiter-authorized file access remain future work.\n\n## Security and remaining work
+## Student profile and eligibility API
+
+- GET /api/student/profile — return the authenticated student's academic profile (creates an empty profile record when needed).
+- PUT /api/student/profile — update CGPA, graduation year, degree, branch, skills, and a resume URL.
+- GET /api/student/jobs/matches — return approved, non-expired jobs with eligibility and match explanations.
+
+The eligibility rule checks the job's minimum CGPA and whether every required skill is present in the student's profile (case-insensitive skill-name comparison). The match percentage is a transparent rule-based score: 50% CGPA requirement score and 50% required-skill coverage score. If a job has no CGPA or skill requirement, that criterion receives full credit. Missing profile information is treated as unknown/not satisfied for eligibility and is called out in the explanation; it is not guessed. This is a deterministic MVP rule, not an AI prediction.
+
+The profile stores a resume URL; secure file upload and recruiter-authorized file access remain future work.
+
+## Security and remaining work
 - Passwords are hashed using BCrypt.
 - JWT request authentication is stateless.
 - Frontend CORS currently allows local Vite origins only.
