@@ -286,6 +286,15 @@ export default function App(){
  const role=auth.user?.role==='RECRUITER'?'Recruiter':auth.user?.role==='ADMIN'?'Admin':'Student'
 
  useEffect(()=>{
+  const handleUnauthorized=()=>{
+   setAuth({token:null,user:null})
+   window.location.assign('/login')
+  }
+  window.addEventListener('placemate:unauthorized',handleUnauthorized)
+  return()=>window.removeEventListener('placemate:unauthorized',handleUnauthorized)
+ },[])
+
+ useEffect(()=>{
   if(!auth.token){setChecking(false);return}
   let active=true
   authApi.me().then(response=>{
