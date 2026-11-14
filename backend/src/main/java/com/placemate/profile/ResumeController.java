@@ -14,6 +14,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.placemate.application.Application;
@@ -65,6 +66,7 @@ public class ResumeController {
     }
 
     @GetMapping("/recruiter/applications/{applicationId}/resume")
+    @Transactional(readOnly=true)
     public ResponseEntity<Resource> recruiterResume(Authentication auth,@PathVariable Long applicationId) throws IOException {
         User recruiter=current(auth,Role.RECRUITER);
         Application application=applications.findById(applicationId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Application not found."));
