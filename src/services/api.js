@@ -43,4 +43,10 @@ export const jobApi = {
   updateApplicationStatus: (applicationId, payload) => api.patch(`/recruiter/applications/${applicationId}/status`, payload),
 }
 
+export const profileApi = {
+  get: () => api.get('/student/profile'),
+  update: (payload) => api.put('/student/profile', payload),
+  matches: () => api.get('/student/jobs/matches'),
+}
+
 export default api
