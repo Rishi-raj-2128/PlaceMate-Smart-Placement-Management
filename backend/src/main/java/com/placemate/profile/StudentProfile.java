@@ -57,6 +57,7 @@ public class StudentProfile {
     public String getBranch() { return branch; }
     public Set<String> getSkills() { return skills; }
     public String getResumeUrl() { return resumeUrl; }
+    public void setResumeUrl(String resumeUrl) { this.resumeUrl = resumeUrl; }
     public Instant getUpdatedAt() { return updatedAt; }
 
     public void update(StudentProfileRequest request) {
