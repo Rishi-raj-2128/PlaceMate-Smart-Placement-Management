@@ -15,17 +15,20 @@ import com.placemate.job.JobStatus;
 import com.placemate.user.Role;
 import com.placemate.user.User;
 import com.placemate.user.UserRepository;
+import com.placemate.notification.NotificationService;
 
 @Service
 public class ApplicationService {
     private final ApplicationRepository applications;
     private final JobRepository jobs;
     private final UserRepository users;
+    private final NotificationService notifications;
 
-    public ApplicationService(ApplicationRepository applications, JobRepository jobs, UserRepository users) {
+    public ApplicationService(ApplicationRepository applications, JobRepository jobs, UserRepository users, NotificationService notifications) {
         this.applications = applications;
         this.jobs = jobs;
         this.users = users;
+        this.notifications = notifications;
     }
 
     @Transactional
@@ -41,7 +44,10 @@ public class ApplicationService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You have already applied for this job.");
         }
         try {
-            return ApplicationResponse.from(applications.saveAndFlush(new Application(student, job)));
+            Application saved = applications.saveAndFlush(new Application(student, job));
+            notifications.create(job.getCreatedBy(), "APPLICATION", "New application received",
+                student.getFullName() + " applied for " + job.getTitle() + ".", "/applicants?jobId=" + job.getId());
+            return ApplicationResponse.from(saved);
         } catch (DataIntegrityViolationException exception) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You have already applied for this job.");
         }
@@ -78,7 +84,10 @@ public class ApplicationService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update applicants for your own jobs.");
         }
         application.updateStatus(request.status(), request.recruiterNote());
-        return ApplicationResponse.from(applications.save(application));
+        Application saved = applications.save(application);
+        notifications.create(application.getStudent(), "APPLICATION_UPDATE", "Application status updated",
+            "Your application for " + application.getJob().getTitle() + " is now " + request.status().name().replace('_', ' ').toLowerCase() + ".", "/applications");
+        return ApplicationResponse.from(saved);
     }
 
     private User requireUser(String email, Role role) {
