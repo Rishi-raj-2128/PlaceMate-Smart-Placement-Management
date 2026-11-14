@@ -129,7 +129,7 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 - **Operational setup:** CI workflow, health endpoint, Dockerfiles, Compose and Nginx configuration.
 - **Browser E2E coverage:** added Playwright Chromium journeys for student registration/login/logout, recruiter registration, guest route protection and Admin self-registration denial.
 - **Backend test coverage:** focused service/controller tests and MockMvc integration coverage for authentication, jobs, applications, profiles/matching, resumes, interviews, notifications and admin reporting.
-- **Browser end-to-end coverage:** Playwright journeys exercise student registration, live dashboard, profile update and sign-out, plus recruiter registration, recruiter dashboard and job-posting navigation.
+- **Browser end-to-end coverage:** Playwright journeys exercise student and recruiter registration, live dashboards, profile updates, and the complete placement lifecycle: recruiter job posting, isolated CI admin approval, student application, recruiter shortlisting, interview scheduling, and student notification receipt.
 - **README refresh:** setup, API groups, current feature scope, verification and deployment notes updated.
 
 ## Known limitations and verification status
