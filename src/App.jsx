@@ -10,9 +10,10 @@ import {
   CircleX, Send, ExternalLink, Zap, Award, BookOpen, MessageSquare
 } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from 'recharts'
-import { authApi, jobApi, profileApi } from './services/api.js'
+import { authApi, jobApi, profileApi, resumeApi } from './services/api.js'
 import { RecruiterJobsPage, PostJobPage, JobApprovalsPage } from './pages/JobManagement.jsx'
 import { StudentApplicationsPage, RecruiterApplicantsPage } from './pages/ApplicationPages.jsx'
+import { InterviewPage, NotificationsPage, AdminStudentsPage, AdminRecruitersPage, AdminCompaniesPage, AdminAnalyticsPage, AdminReportsPage } from './pages/WorkspacePages.jsx'
 
 const jobs = [
   { id: 1, company: 'Microsoft', role: 'Software Engineer', place: 'Bengaluru · Hybrid', salary: '₹18–24 LPA', cgpa: '7.5+', skills: ['Java', 'DSA', 'OOP'], days: '3 days left', color: '#2563eb', logo: 'M', match: 96, type: 'Full-time' },
@@ -46,9 +47,9 @@ function Landing() {
   </div>
 }
 
-const studentMenu=[['Overview',LayoutDashboard,'/dashboard'],['My profile',UserRound,'/profile'],['Find jobs',BriefcaseBusiness,'/jobs'],['Recommended',Sparkles,'/recommended'],['My applications',FileText,'/applications'],['Interviews',CalendarDays,'/interviews']]
-const recruiterMenu=[['Overview',LayoutDashboard,'/dashboard'],['Company profile',Building2,'/profile'],['Post a job',Plus,'/post-job'],['Manage jobs',BriefcaseBusiness,'/jobs'],['Applicants',Users,'/applicants'],['Interviews',CalendarDays,'/interviews']]
-const adminMenu=[['Overview',LayoutDashboard,'/dashboard'],['Students',GraduationCap,'/students'],['Recruiters',Users,'/recruiters'],['Companies',Building2,'/companies'],['Job approvals',ShieldCheck,'/approvals'],['Applications',FileText,'/applications'],['Analytics',ChartNoAxesCombined,'/analytics'],['Reports',FileText,'/reports']]
+const studentMenu=[['Overview',LayoutDashboard,'/dashboard'],['Notifications',Bell,'/notifications'],['My profile',UserRound,'/profile'],['Find jobs',BriefcaseBusiness,'/jobs'],['Recommended',Sparkles,'/recommended'],['My applications',FileText,'/applications'],['Interviews',CalendarDays,'/interviews']]
+const recruiterMenu=[['Overview',LayoutDashboard,'/dashboard'],['Notifications',Bell,'/notifications'],['Company profile',Building2,'/profile'],['Post a job',Plus,'/post-job'],['Manage jobs',BriefcaseBusiness,'/jobs'],['Applicants',Users,'/applicants'],['Interviews',CalendarDays,'/interviews']]
+const adminMenu=[['Overview',LayoutDashboard,'/dashboard'],['Notifications',Bell,'/notifications'],['Students',GraduationCap,'/students'],['Recruiters',Users,'/recruiters'],['Companies',Building2,'/companies'],['Job approvals',ShieldCheck,'/approvals'],['Applications',FileText,'/applications'],['Analytics',ChartNoAxesCombined,'/analytics'],['Reports',FileText,'/reports']]
 function DashboardLayout({children,role,onLogout,user}) {
  const [open,setOpen]=useState(false), [notice,setNotice]=useState(false)
  const menu=role==='Recruiter'?recruiterMenu:role==='Admin'?adminMenu:studentMenu
@@ -121,6 +122,9 @@ function Profile(){
  const [saving,setSaving]=useState(false)
  const [error,setError]=useState('')
  const [success,setSuccess]=useState('')
+ const [resumeFile,setResumeFile]=useState(null)
+ const [resumeBusy,setResumeBusy]=useState(false)
+ const [resumeMessage,setResumeMessage]=useState('')
  useEffect(()=>{
   let active=true
   profileApi.get().then(response=>{
@@ -166,7 +170,8 @@ function Profile(){
      <label className="form-label">Degree<input name="degree" maxLength="120" value={form.degree} onChange={change} placeholder="e.g. B.Tech"/></label>
      <label className="form-label">Branch / specialization<input name="branch" maxLength="120" value={form.branch} onChange={change} placeholder="e.g. Computer Science"/></label>
      <label className="form-label form-span">Skills <span className="optional-label">Comma separated</span><input name="skills" value={form.skills} onChange={change} placeholder="Java, React, SQL, DSA"/></label>
-     <label className="form-label form-span">Resume link<input type="url" name="resumeUrl" maxLength="500" value={form.resumeUrl} onChange={change} placeholder="https://drive.google.com/..."/></label>
+     <label className="form-label form-span">Resume link or uploaded file name<input type="text" name="resumeUrl" maxLength="500" value={form.resumeUrl} onChange={change} placeholder="https://drive.google.com/..."/></label>
+     <div className="form-label form-span">Upload resume (PDF, DOC, DOCX · max 5 MB)<input type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={e=>{setResumeFile(e.target.files?.[0]||null);setResumeMessage('')}}/><div className="resume-actions"><button type="button" className="btn btn-outline" disabled={!resumeFile||resumeBusy} onClick={async()=>{setResumeBusy(true);setResumeMessage('');try{await resumeApi.upload(resumeFile);const refreshed=await profileApi.get();setProfile(refreshed.data);setForm(current=>({...current,resumeUrl:refreshed.data.resumeUrl||''}));setResumeFile(null);setResumeMessage('Resume uploaded successfully.')}catch(err){setResumeMessage(err.response?.data?.message||'Resume upload failed.')}finally{setResumeBusy(false)}}}>{resumeBusy?'Uploading...':'Upload resume'} <FileText size={14}/></button><button type="button" className="btn btn-outline" disabled={!profile?.resumeUrl} onClick={async()=>{try{const r=await resumeApi.studentDownload();const url=URL.createObjectURL(r.data);const a=document.createElement('a');a.href=url;a.download='PlaceMate-resume';a.click();URL.revokeObjectURL(url)}catch(err){setResumeMessage(err.response?.data?.message||'Could not download resume.')}}}><ExternalLink size={14}/> Download uploaded resume</button></div>{resumeMessage&&<small className="resume-message">{resumeMessage}</small>}</div>
     </div>
     {success&&<div className="success-message" role="status">{success}</div>}
     <div className="post-job-actions"><button className="btn btn-primary" disabled={saving}>{saving?'Saving profile...':'Save profile'} <Check size={15}/></button></div>
@@ -269,17 +274,18 @@ export default function App(){
    <Route path="/dashboard" element={<Dashboard role={role}/>}/>
    <Route path="/jobs" element={role === "Recruiter" ? <RecruiterJobsPage/> : <JobsPage allowApply={role === "Student"}/>}/>
    <Route path="/recommended" element={<JobsPage title="Recommended for you" allowApply={role === "Student"} recommended={role === "Student"}/>}/>
-   <Route path="/applications" element={role === "Student" ? <StudentApplicationsPage/> : <GenericPage title="Applications" description="Application tracking is available in the student workspace." icon={FileText}/>}/>
+   <Route path="/applications" element={role === "Student" ? <StudentApplicationsPage/> : role === "Admin" ? <AdminReportsPage/> : <GenericPage title="Applications" description="Application tracking is available in the student workspace." icon={FileText}/>}/>
    <Route path="/profile" element={role === "Student" ? <Profile/> : <GenericPage title="Company profile" description="Manage your organization details and recruiter information." icon={Building2}/>}/>
    <Route path="/post-job" element={<PostJobPage/>}/>
    <Route path="/applicants" element={role === "Recruiter" ? <RecruiterApplicantsPage/> : <GenericPage title="Applicants" description="Applicant management is available in the recruiter workspace." icon={Users}/>}/>
-   <Route path="/interviews" element={<GenericPage title="Interviews" description="Keep every interview schedule and update organized." icon={CalendarDays}/>}/>
-   <Route path="/students" element={<GenericPage title="Students" description="Manage student profiles and placement readiness." icon={GraduationCap}/>}/>
-   <Route path="/recruiters" element={<GenericPage title="Recruiters" description="Manage recruiter access and activity." icon={Users}/>}/>
-   <Route path="/companies" element={<GenericPage title="Companies" description="Manage organizations participating in campus placements." icon={Building2}/>}/>
+   <Route path="/interviews" element={<InterviewPage role={role}/>}/>
+   <Route path="/notifications" element={<NotificationsPage/>}/>
+   <Route path="/students" element={role === "Admin" ? <AdminStudentsPage/> : <GenericPage title="Students" description="Manage student profiles and placement readiness." icon={GraduationCap}/>}/>
+   <Route path="/recruiters" element={role === "Admin" ? <AdminRecruitersPage/> : <GenericPage title="Recruiters" description="Manage recruiter access and activity." icon={Users}/>}/>
+   <Route path="/companies" element={role === "Admin" ? <AdminCompaniesPage/> : <GenericPage title="Companies" description="Manage organizations participating in campus placements." icon={Building2}/>}/>
    <Route path="/approvals" element={<JobApprovalsPage/>}/>
-   <Route path="/analytics" element={<GenericPage title="Placement analytics" description="Explore placement performance across departments and drives." icon={ChartNoAxesCombined}/>}/>
-   <Route path="/reports" element={<GenericPage title="Reports" description="Create and review placement reports." icon={FileText}/>}/>
+   <Route path="/analytics" element={role === "Admin" ? <AdminAnalyticsPage/> : <GenericPage title="Placement analytics" description="Explore placement performance across departments and drives." icon={ChartNoAxesCombined}/>}/>
+   <Route path="/reports" element={role === "Admin" ? <AdminReportsPage/> : <GenericPage title="Reports" description="Create and review placement reports." icon={FileText}/>}/>
    <Route path="*" element={<Navigate to="/dashboard" replace/>}/>
   </Routes></DashboardLayout>:<Navigate to="/login" state={{from:location.pathname}} replace/>}/>
  </Routes>
