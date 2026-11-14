@@ -102,6 +102,8 @@ The frontend stores the returned access token in browser local storage and sends
 | Public approved-job search and filters | Implemented in code; local testing pending |
 | Student job applications and duplicate prevention | Implemented in code; local testing pending |
 | Recruiter applicant review and status updates | Implemented in code; local testing pending |
+| Student profile, CGPA and skills persistence | Implemented in code; local testing pending |
+| Rule-based eligibility and job match scoring | Implemented in code; local testing pending |
 | Interviews, notifications and placement analytics APIs | Not implemented yet |
 | Live dashboard data | Still uses clearly illustrative frontend fixtures |
 | Email verification and password reset | Not implemented |
@@ -115,18 +117,19 @@ The frontend stores the returned access token in browser local storage and sends
 - **Frontend integration:** Axios API client, real registration/login requests, token persistence, session restoration, logout, and API error/loading states.
 - **Job management:** recruiter-owned job creation, editing and deletion; public approved-job search; admin approve/reject queue; job review notes. React screens are connected to these endpoints.
 - **Applications:** student apply action, unique student/job application constraint, student application tracker, recruiter applicant list, and recruiter status updates.
+- **Student profile and matching:** persistent academic profile (CGPA, graduation year, degree, branch, skills, resume link) plus eligibility explanations and a rule-based job match score.
 
 ## Important notes
 
 - Admin accounts must be provisioned by the placement team; there is no public Admin signup.
-- Job listings and application tracking now use backend APIs. Student profile editing, persistent CGPA/skills and automatic eligibility matching, interviews, notifications, and dashboard metrics still need implementation; some dashboard data remains illustrative.
+- Job listings and application tracking now use backend APIs. Student academic profile and eligibility matching now use backend APIs. Resume file upload, interviews, notifications, admin analytics, and live dashboard metrics still need implementation; some dashboard data remains illustrative.
 - Compilation, database connectivity, and end-to-end flows (authentication, job management, and applications) have **not yet been verified on a local machine**. Run both apps locally and test before treating this as production-ready.
 - Before production: configure HTTPS, unique secrets, rate limiting, email verification, password recovery, audit logging, and secure token storage.
 
 
 ## Remaining development roadmap
 
-1. **Student profile and eligibility:** persistent education, CGPA, skills, resume upload and automatic matching against job criteria.
+1. **Resume upload:** secure file upload and recruiter-authorized resume access (a resume URL field is available now).
 2. **Interviews and notifications:** interview scheduling, status notifications and reminders.
 3. **Admin workspace:** student/recruiter management, company verification, placement analytics and reports.
 4. **Production readiness:** automated backend/frontend tests, validation and security review, deployment configuration, logging and documentation.
