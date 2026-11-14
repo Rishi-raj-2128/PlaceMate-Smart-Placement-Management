@@ -126,13 +126,13 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 - **Interviews and notifications:** interview scheduling/status and event-triggered in-app notifications.
 - **Admin workspace:** user/company lists, company verification, overview metrics and placement reporting.
 - **Operational setup:** CI workflow, health endpoint, Dockerfiles, Compose and Nginx configuration.
-- **Backend test coverage:** added JobService authorization/validation tests, AuthService registration/login tests, ApplicationService workflow/ownership tests, and StudentProfileService eligibility/matching tests.
+- **Backend test coverage:** added focused service/controller tests plus MockMvc integration coverage for JWT authentication, role isolation, recruiter job creation/listing, and public visibility rules for pending jobs.
 - **README refresh:** setup, API groups, current feature scope, verification and deployment notes updated.
 
 ## Known limitations and verification status
 
 - GitHub Actions passed on commit `34833d86ea48`: frontend production build, backend Maven verification against MySQL, backend health smoke test, Docker Compose validation and Nginx configuration validation. Browser-based end-to-end flows and a deployed production environment have not yet been exercised.
-- Backend automated tests include the health endpoint smoke test plus JobService, AuthService, ApplicationService and StudentProfileService unit coverage. Resume access, interviews and notifications remain next.
+- Backend automated tests include the health endpoint smoke test, service/controller unit coverage across jobs, authentication, applications, profiles, resumes, interviews and notifications, plus MockMvc integration tests for authentication/security and recruiter job API access boundaries. Full browser-based end-to-end flows and deployed production verification remain outstanding.
 - Interview scheduling, rescheduling and completion/cancellation are implemented; students receive an in-app notification when interview details change.
 - Notifications are in-app only. Email/SMS delivery, push notifications and scheduled reminders are not implemented.
 - Resume upload validates file size, extension and basic PDF/DOC/DOCX signatures/container structure; downloads are scoped to the owning student and recruiter-owned applicant records. Production hardening should add comprehensive MIME inspection, malware scanning, object storage, retention/deletion controls, and backups.
