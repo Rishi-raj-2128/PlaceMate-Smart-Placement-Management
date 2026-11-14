@@ -70,10 +70,11 @@ class ApplicationServiceTest {
 
     @Test
     void applicationToUnapprovedJobIsRejected() {
-        when(users.findByEmailIgnoreCase("student@example.com"))
-            .thenReturn(Optional.of(user(1L, Role.STUDENT)));
-        when(jobs.findById(7L)).thenReturn(Optional.of(job(7L,
-            user(2L, Role.RECRUITER), JobStatus.PENDING)));
+        User student = user(1L, Role.STUDENT);
+        User recruiter = user(2L, Role.RECRUITER);
+        Job pendingJob = job(7L, recruiter, JobStatus.PENDING);
+        when(users.findByEmailIgnoreCase("student@example.com")).thenReturn(Optional.of(student));
+        when(jobs.findById(7L)).thenReturn(Optional.of(pendingJob));
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
             () -> service.apply("student@example.com", 7L));
@@ -118,8 +119,8 @@ class ApplicationServiceTest {
 
     @Test
     void recruiterCannotResetApplicationToApplied() {
-        when(users.findByEmailIgnoreCase("recruiter@example.com"))
-            .thenReturn(Optional.of(user(2L, Role.RECRUITER)));
+        User recruiter = user(2L, Role.RECRUITER);
+        when(users.findByEmailIgnoreCase("recruiter@example.com")).thenReturn(Optional.of(recruiter));
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
             () -> service.updateStatus("recruiter@example.com", 9L,
