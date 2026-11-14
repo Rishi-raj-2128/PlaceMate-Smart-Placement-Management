@@ -22,7 +22,7 @@ public class Notification {
     private String message;
     @Column(length = 300)
     private String targetUrl;
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
     private Instant readAt;
     protected Notification() {}
