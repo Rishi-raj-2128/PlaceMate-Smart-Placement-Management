@@ -14,6 +14,8 @@ public class InterviewController {
     @PostMapping("/recruiter/applications/{applicationId}/interviews")
     @ResponseStatus(HttpStatus.CREATED)
     public InterviewResponse schedule(Authentication auth,@PathVariable Long applicationId,@Valid @RequestBody InterviewRequest request){return service.schedule(auth.getName(),applicationId,request);}
+    @PutMapping("/recruiter/interviews/{id}")
+    public InterviewResponse reschedule(Authentication auth,@PathVariable Long id,@Valid @RequestBody InterviewRequest request){return service.reschedule(auth.getName(),id,request);}
     @GetMapping("/student/interviews")
     public List<InterviewResponse> student(Authentication auth){return service.mine(auth.getName());}
     @GetMapping("/recruiter/interviews")
