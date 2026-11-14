@@ -130,7 +130,7 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 
 ## Known limitations and verification status
 
-- The latest GitHub commit was inspected, but no successful CI run or local frontend/backend build result was available during this review. Treat compilation, database migrations, browser behavior and full end-to-end flows as **not yet verified** until the GitHub Actions run completes and the application is exercised against MySQL.
+- GitHub Actions passed on commit `55399ce27830`: frontend production build, backend Maven verification against MySQL (including the health endpoint test), Docker Compose configuration validation, and Nginx configuration validation. Browser-based end-to-end flows and a deployed production environment have not yet been exercised.
 - The CI workflow currently includes a frontend build and backend Maven verification plus a backend health smoke test; domain-level automated tests are still limited.
 - Interview scheduling, rescheduling and completion/cancellation are implemented; students receive an in-app notification when interview details change.
 - Notifications are in-app only. Email/SMS delivery, push notifications and scheduled reminders are not implemented.
