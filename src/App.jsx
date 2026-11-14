@@ -10,7 +10,7 @@ import {
   CircleX, Send, ExternalLink, Zap, Award, BookOpen, MessageSquare
 } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from 'recharts'
-import { authApi, jobApi } from './services/api.js'
+import { authApi, jobApi, profileApi } from './services/api.js'
 import { RecruiterJobsPage, PostJobPage, JobApprovalsPage } from './pages/JobManagement.jsx'
 import { StudentApplicationsPage, RecruiterApplicantsPage } from './pages/ApplicationPages.jsx'
 
@@ -102,7 +102,66 @@ function JobsPage({title='Find your next opportunity',allowApply=true}) {
 }
 
 function Applications(){return <><PageHeading eyebrow="YOUR JOURNEY" title="My applications" description="Every opportunity, every update, all in one place."/><div className="panel table-panel"><div className="panel-heading"><div><h3>Application tracker</h3><p>Follow your progress from application to outcome</p></div><span className="status-badge blue">12 total applications</span></div><div className="table-scroll"><table><thead><tr><th>COMPANY</th><th>POSITION</th><th>APPLIED</th><th>STATUS</th><th>NEXT STEP</th></tr></thead><tbody>{demoApplications.map((a,i)=><tr key={a.company}><td><div className="company-cell"><b className={`company-logo logo-${i}`}>{a.company[0]}</b><strong>{a.company}</strong></div></td><td>{a.role}</td><td>{a.date}</td><td><span className={`status-badge ${a.tone}`}>{a.status}</span></td><td><button className="text-link">View details <ArrowRight size={14}/></button></td></tr>)}</tbody></table></div></div><div className="panel timeline-panel"><h3>Application journey</h3><div className="timeline"><span className="timeline-done">Applied</span><i/><span className="timeline-done">Under review</span><i/><span className="timeline-current">Shortlisted</span><i/><span>Interview</span><i/><span>Outcome</span></div></div></>}
-function Profile(){return <><PageHeading eyebrow="YOUR IDENTITY" title="My profile" description="Make it easy for recruiters to see what makes you a great fit." action={<Button onClick={()=>alert('Profile editor will connect to the backend API.')}><FileText size={16}/> Edit profile</Button>}/><div className="profile-page-grid"><section className="panel profile-hero-card"><div className="profile-cover"/><div className="profile-person"><div className="profile-avatar">R</div><div><h2>Rishi Raj</h2><p>B.Tech · Computer Science & Engineering</p><span><MapPin size={14}/> Mohali, Punjab</span></div><span className="status-badge green">Open to opportunities</span></div><div className="profile-details"><div><small>EMAIL</small><b>rishi@example.com</b></div><div><small>GRADUATION YEAR</small><b>2028</b></div><div><small>CGPA</small><b>8.4 / 10</b></div></div></section><section className="panel"><div className="panel-heading"><div><h3>Skills & strengths</h3><p>Skills you've added to your profile</p></div><button className="icon-button"><Plus size={17}/></button></div><div className="job-tags profile-skills">{['Java','React','JavaScript','SQL','Data Structures','Python','Problem Solving'].map(s=><span key={s}>{s}</span>)}</div></section></div></>}
+function Profile(){
+ const [profile,setProfile]=useState(null)
+ const [form,setForm]=useState({cgpa:'',graduationYear:'',degree:'',branch:'',skills:'',resumeUrl:''})
+ const [loading,setLoading]=useState(true)
+ const [saving,setSaving]=useState(false)
+ const [error,setError]=useState('')
+ const [success,setSuccess]=useState('')
+ useEffect(()=>{
+  let active=true
+  profileApi.get().then(response=>{
+   if(!active)return
+   const p=response.data
+   setProfile(p)
+   setForm({cgpa:p.cgpa??'',graduationYear:p.graduationYear??'',degree:p.degree??'',branch:p.branch??'',skills:(p.skills||[]).join(', '),resumeUrl:p.resumeUrl??''})
+  }).catch(err=>{if(active)setError(err.response?.data?.message||'Unable to load your student profile.')})
+    .finally(()=>{if(active)setLoading(false)})
+  return()=>{active=false}
+ },[])
+ const change=e=>setForm(current=>({...current,[e.target.name]:e.target.value}))
+ const submit=async e=>{
+  e.preventDefault();setSaving(true);setError('');setSuccess('')
+  const payload={
+   cgpa:form.cgpa===''?null:Number(form.cgpa),
+   graduationYear:form.graduationYear===''?null:Number(form.graduationYear),
+   degree:form.degree.trim()||null,branch:form.branch.trim()||null,
+   skills:form.skills.split(',').map(s=>s.trim()).filter(Boolean),
+   resumeUrl:form.resumeUrl.trim()||null
+  }
+  try{
+   const response=await profileApi.update(payload)
+   setProfile(response.data)
+   setForm({cgpa:response.data.cgpa??'',graduationYear:response.data.graduationYear??'',degree:response.data.degree??'',branch:response.data.branch??'',skills:(response.data.skills||[]).join(', '),resumeUrl:response.data.resumeUrl??''})
+   setSuccess('Your profile has been saved successfully.')
+  }catch(err){setError(err.response?.data?.message||'Could not save your profile. Please check the entered details.')}
+  finally{setSaving(false)}
+ }
+ if(loading)return <div className="panel empty-state">Loading your profile...</div>
+ return <>
+  <PageHeading eyebrow="YOUR IDENTITY" title="My profile" description="Keep your academic details and skills up to date to get more accurate job matches."/>
+  {error&&<div className="auth-error">{error}</div>}
+  <div className="profile-page-grid">
+   <section className="panel profile-hero-card"><div className="profile-cover"/><div className="profile-person"><div className="profile-avatar">{(profile?.fullName||'S').charAt(0).toUpperCase()}</div><div><h2>{profile?.fullName||'Student'}</h2><p>{profile?.degree||'Degree not added'} · {profile?.branch||profile?.department||'Department not added'}</p><span><Mail size={13}/>{profile?.email}</span></div><span className="status-badge blue">Student account</span></div>
+    <div className="profile-details"><div><small>ENROLLMENT NUMBER</small><b>{profile?.enrollmentNumber||'Not provided'}</b></div><div><small>CGPA</small><b>{profile?.cgpa??'Not added'}{profile?.cgpa!=null?' / 10':''}</b></div><div><small>GRADUATION YEAR</small><b>{profile?.graduationYear||'Not added'}</b></div></div>
+   </section>
+   <form className="panel student-profile-form" onSubmit={submit}>
+    <div className="panel-heading"><div><h3>Academic profile</h3><p>These details power your eligibility and job match results.</p></div><Award size={20}/></div>
+    <div className="form-grid">
+     <label className="form-label">CGPA (out of 10)<input type="number" name="cgpa" min="0" max="10" step="0.01" value={form.cgpa} onChange={change} placeholder="e.g. 8.25"/></label>
+     <label className="form-label">Graduation year<input type="number" name="graduationYear" min="2000" max="2100" value={form.graduationYear} onChange={change} placeholder="e.g. 2028"/></label>
+     <label className="form-label">Degree<input name="degree" maxLength="120" value={form.degree} onChange={change} placeholder="e.g. B.Tech"/></label>
+     <label className="form-label">Branch / specialization<input name="branch" maxLength="120" value={form.branch} onChange={change} placeholder="e.g. Computer Science"/></label>
+     <label className="form-label form-span">Skills <span className="optional-label">Comma separated</span><input name="skills" value={form.skills} onChange={change} placeholder="Java, React, SQL, DSA"/></label>
+     <label className="form-label form-span">Resume link<input type="url" name="resumeUrl" maxLength="500" value={form.resumeUrl} onChange={change} placeholder="https://drive.google.com/..."/></label>
+    </div>
+    {success&&<div className="success-message" role="status">{success}</div>}
+    <div className="post-job-actions"><button className="btn btn-primary" disabled={saving}>{saving?'Saving profile...':'Save profile'} <Check size={15}/></button></div>
+   </form>
+  </div>
+ </>
+}
 function GenericPage({title,description,icon:Icon=FileText}){return <><PageHeading eyebrow="WORKSPACE" title={title} description={description}/><div className="panel empty-state"><div className="empty-icon"><Icon size={28}/></div><h3>{title} workspace</h3><p>This section is ready for integration with the PlaceMate Spring Boot APIs. Connect your backend to load live records here.</p><Button onClick={()=>alert('Backend integration is not connected yet.')}>Configure workspace <ArrowRight size={15}/></Button></div></>}
 function Login({register=false,onAuthenticated}) {
  const [role,setRole]=useState('Student')
