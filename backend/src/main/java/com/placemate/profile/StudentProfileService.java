@@ -33,6 +33,12 @@ public class StudentProfileService {
     @Transactional
     public StudentProfileResponse updateProfile(String email, StudentProfileRequest request) {
         User student = requireStudent(email);
+        String resumeReference = request.resumeUrl();
+        if (resumeReference != null && !resumeReference.isBlank()
+                && !resumeReference.startsWith("http://") && !resumeReference.startsWith("https://")
+                && !resumeReference.startsWith(student.getId() + "-")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Uploaded resume references must belong to your own account.");
+        }
         StudentProfile profile = getOrCreate(student);
         profile.update(request);
         return StudentProfileResponse.from(profiles.save(profile));
