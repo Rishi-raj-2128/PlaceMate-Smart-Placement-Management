@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "notifications", indexes = {
-    @Index(name = "idx_notification_user_created", columnList = "user_id, createdAt")
+    @Index(name = "idx_notification_user_created", columnList = "user_id, created_at")
 })
 public class Notification {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
