@@ -5,6 +5,8 @@ import { adminApi, interviewApi, notificationApi, resumeApi } from '../services/
 
 const dateTime = value => value ? new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}) : '—'
 const dateOnly = value => value ? new Date(value).toLocaleDateString(undefined,{dateStyle:'medium'}) : '—'
+const localDateTimeInput = value => { const date=new Date(value); return new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16) }
+const localDateTimeMin = () => localDateTimeInput(Date.now()+60000)
 const label = value => (value||'').replaceAll('_',' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())
 const statusTone = value => ({SCHEDULED:'blue',COMPLETED:'green',CANCELLED:'red',APPLIED:'blue',UNDER_REVIEW:'purple',SHORTLISTED:'green',REJECTED:'red',HIRED:'green'}[value]||'blue')
 
@@ -12,6 +14,7 @@ export function InterviewPage({role}) {
  const [params] = useSearchParams()
  const [items,setItems]=useState([])
  const [applicationId,setApplicationId]=useState(params.get('applicationId')||'')
+ const [editingInterviewId,setEditingInterviewId]=useState(null)
  const [scheduledAt,setScheduledAt]=useState('')
  const [durationMinutes,setDurationMinutes]=useState('30')
  const [mode,setMode]=useState('ONLINE')
@@ -28,28 +31,40 @@ export function InterviewPage({role}) {
  const submit=async e=>{
   e.preventDefault();setSaving(true);setError('');setSuccess('')
   try{
-   await interviewApi.schedule(applicationId,{scheduledAt:new Date(scheduledAt).toISOString(),durationMinutes:Number(durationMinutes),mode,meetingLink:meetingLink.trim()||null,location:location.trim()||null,notes:notes.trim()||null})
-   setSuccess('Interview scheduled. The student has received an in-app notification.')
-   setApplicationId('');setScheduledAt('');setMeetingLink('');setLocation('');setNotes('');load()
+   const payload={scheduledAt:new Date(scheduledAt).toISOString(),durationMinutes:Number(durationMinutes),mode,meetingLink:meetingLink.trim()||null,location:location.trim()||null,notes:notes.trim()||null}
+   if(editingInterviewId){
+    await interviewApi.reschedule(editingInterviewId,payload)
+    setSuccess('Interview rescheduled. The student has received an in-app notification.')
+   }else{
+    await interviewApi.schedule(applicationId,payload)
+    setSuccess('Interview scheduled. The student has received an in-app notification.')
+   }
+   setEditingInterviewId(null);setApplicationId('');setScheduledAt('');setMeetingLink('');setLocation('');setNotes('');load()
   }catch(e){setError(e.response?.data?.message||'Unable to schedule interview.')}
   finally{setSaving(false)}
  }
  const update=async(id,status)=>{setError('');try{await interviewApi.updateStatus(id,status);load()}catch(e){setError(e.response?.data?.message||'Unable to update interview status.')}}
+ const startReschedule=item=>{
+  setEditingInterviewId(item.id);setApplicationId(String(item.applicationId));setScheduledAt(localDateTimeInput(item.scheduledAt))
+  setDurationMinutes(String(item.durationMinutes));setMode(item.mode);setMeetingLink(item.meetingLink||'')
+  setLocation(item.location||'');setNotes(item.notes||'');setError('');setSuccess('')
+  window.scrollTo({top:0,behavior:'smooth'})
+ }
  return <>
   <div className="page-heading"><div><span className="eyebrow">INTERVIEW WORKSPACE</span><h1>Interviews</h1><p>{recruiter?'Schedule interviews and keep candidates informed.':'Review your upcoming interviews and meeting details.'}</p></div></div>
   {error&&<div className="auth-error">{error}</div>}{success&&<div className="success-message">{success}</div>}
   {recruiter&&<form className="panel workspace-form" onSubmit={submit}>
-   <div className="panel-heading"><div><h3>Schedule an interview</h3><p>Use the application ID from the Applicants workspace.</p></div><CalendarDays size={20}/></div>
+   <div className="panel-heading"><div><h3>{editingInterviewId?'Reschedule interview':'Schedule an interview'}</h3><p>{editingInterviewId?'Update the date, time, or meeting details for this scheduled interview.':'Use the application ID from the Applicants workspace.'}</p></div><CalendarDays size={20}/></div>
    <div className="form-grid">
-    <label className="form-label">Application ID<input required type="number" min="1" value={applicationId} onChange={e=>setApplicationId(e.target.value)} placeholder="e.g. 12"/></label>
-    <label className="form-label">Date & time<input required type="datetime-local" min={new Date(Date.now()+60000).toISOString().slice(0,16)} value={scheduledAt} onChange={e=>setScheduledAt(e.target.value)}/></label>
+    <label className="form-label">Application ID<input required type="number" min="1" value={applicationId} readOnly={Boolean(editingInterviewId)} onChange={e=>setApplicationId(e.target.value)} placeholder="e.g. 12"/></label>
+    <label className="form-label">Date & time<input required type="datetime-local" min={localDateTimeMin()} value={scheduledAt} onChange={e=>setScheduledAt(e.target.value)}/></label>
     <label className="form-label">Duration (minutes)<input required type="number" min="15" max="480" step="15" value={durationMinutes} onChange={e=>setDurationMinutes(e.target.value)}/></label>
     <label className="form-label">Interview mode<select value={mode} onChange={e=>setMode(e.target.value)}><option value="ONLINE">Online</option><option value="IN_PERSON">In person</option><option value="PHONE">Phone</option></select></label>
     <label className="form-label form-span">Meeting link (for online interviews)<input type="url" value={meetingLink} onChange={e=>setMeetingLink(e.target.value)} placeholder="https://meet.google.com/..."/></label>
     <label className="form-label form-span">Location (for in-person interviews)<input value={location} onChange={e=>setLocation(e.target.value)} placeholder="Office address or room"/></label>
     <label className="form-label form-span">Notes<textarea rows="3" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Interview instructions or preparation notes"/></label>
    </div>
-   <div className="post-job-actions"><button className="btn btn-primary" disabled={saving||!applicationId||!scheduledAt}>{saving?'Scheduling...':'Schedule interview'} <CalendarDays size={15}/></button></div>
+   <div className="post-job-actions"><button className="btn btn-primary" disabled={saving||!applicationId||!scheduledAt}>{saving?(editingInterviewId?'Saving...':'Scheduling...'):(editingInterviewId?'Save rescheduled interview':'Schedule interview')} <CalendarDays size={15}/></button>{editingInterviewId&&<button type="button" className="btn btn-outline" onClick={()=>{setEditingInterviewId(null);setApplicationId('');setScheduledAt('');setMeetingLink('');setLocation('');setNotes('')}}>Cancel edit</button>}</div>
   </form>}
   <div className="page-subheading"><h2>{recruiter?'Scheduled interviews':'Your interview schedule'}</h2><button className="btn btn-outline" onClick={load}><RefreshCw size={14}/> Refresh</button></div>
   {loading?<div className="panel empty-state">Loading interviews...</div>:items.length===0?<div className="panel empty-state"><CalendarDays size={30}/><h3>No interviews yet</h3><p>{recruiter?'Schedule an interview from an applicant record.':'When a recruiter schedules an interview, its details will appear here.'}</p></div>:
@@ -60,7 +75,7 @@ export function InterviewPage({role}) {
      {item.meetingLink&&<a className="workspace-inline-link" href={item.meetingLink} target="_blank" rel="noreferrer"><Video size={14}/> Join meeting</a>}
      {item.location&&<p className="workspace-note"><MapPin size={14}/>{item.location}</p>}
      {item.notes&&<p className="workspace-note">{item.notes}</p>}
-     {recruiter&&item.status==='SCHEDULED'&&<div className="workspace-actions"><button className="btn btn-outline" onClick={()=>update(item.id,'COMPLETED')}>Mark completed</button><button className="btn btn-outline danger-button" onClick={()=>update(item.id,'CANCELLED')}>Cancel interview</button></div>}
+     {recruiter&&item.status==='SCHEDULED'&&<div className="workspace-actions"><button className="btn btn-outline" onClick={()=>startReschedule(item)}>Reschedule</button><button className="btn btn-outline" onClick={()=>update(item.id,'COMPLETED')}>Mark completed</button><button className="btn btn-outline danger-button" onClick={()=>update(item.id,'CANCELLED')}>Cancel interview</button></div>}
     </div>
    </article>)}</div>}
  </>
