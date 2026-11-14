@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.github
+backend/target
+backend/uploads
+uploads
+.env
+.env.*
