@@ -126,7 +126,7 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 - **Interviews and notifications:** interview scheduling/status and event-triggered in-app notifications.
 - **Admin workspace:** user/company lists, company verification, overview metrics and placement reporting.
 - **Operational setup:** CI workflow, health endpoint, Dockerfiles, Compose and Nginx configuration.
-- **Backend test coverage:** added focused service/controller tests plus MockMvc integration coverage for JWT authentication, role isolation, recruiter job creation/listing, public visibility rules for pending jobs, the student application-to-recruiter-review lifecycle, profile updates/job matching, resume upload/download access controls, and interview scheduling/rescheduling/status and ownership controls.
+- **Backend test coverage:** added focused service/controller tests plus MockMvc integration coverage for JWT authentication, role isolation, recruiter job creation/listing, public visibility rules for pending jobs, the student application-to-recruiter-review lifecycle, profile updates/job matching, resume upload/download access controls, interview scheduling/rescheduling/status and ownership controls, notification recipient/read flows, and admin reporting/company verification APIs.
 - **README refresh:** setup, API groups, current feature scope, verification and deployment notes updated.
 
 ## Known limitations and verification status
@@ -143,7 +143,7 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 ## Remaining work before production
 
 - Automated browser end-to-end coverage for complete student, recruiter and admin journeys.
-- Additional API integration tests for notifications and admin reporting.
+- The planned notification and admin reporting API integration tests have been added; validate them in the latest CI run.
 - Email verification, password reset and account recovery.
 - Hardened JWT storage/lifecycle with refresh and revocation controls.
 - Comprehensive resume MIME inspection, malware scanning, retention/deletion controls and production object storage.
