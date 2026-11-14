@@ -79,10 +79,30 @@ Send `Authorization: Bearer <token>`.
 - `/api/admin/**` requires ADMIN.
 - Public registration accepts STUDENT and RECRUITER only. Admin accounts must be provisioned through a controlled process.
 
+## Job management API
+
+- GET /api/jobs?q=&location=&type= — public search of approved, non-expired jobs.
+- GET /api/jobs/{id} — approved job details.
+- POST /api/recruiter/jobs — create a job (Recruiter JWT required). New jobs start as PENDING.
+- GET /api/recruiter/jobs — list the authenticated recruiter's postings.
+- PUT /api/recruiter/jobs/{id} — update an owned posting; edits return it to PENDING review.
+- DELETE /api/recruiter/jobs/{id} — delete an owned posting.
+- GET /api/admin/jobs/pending — list pending postings (Admin JWT required).
+- PATCH /api/admin/jobs/{id}/review — approve or reject with an optional review note.
+
+Example review body:
+
+```json
+{"status":"APPROVED","reviewNote":"Reviewed by placement team"}
+```
+
+Only approved jobs are visible through public browse endpoints. Recruiters can only modify their own postings. Minimum CGPA and required skills are stored as job criteria; personal eligibility calculation awaits persistent student profile fields.
+
 ## Security and remaining work
 - Passwords are hashed using BCrypt.
 - JWT request authentication is stateless.
 - Frontend CORS currently allows local Vite origins only.
 - Add email verification, password reset, rate limiting, HTTPS, secure secret storage, and monitoring before public deployment.
-- Jobs, applications, interviews, and placement analytics endpoints are not implemented yet.
+- Job posting, recruiter ownership, public approved-job search, and admin review endpoints are implemented in code; local compilation and API tests are pending.
+- Applications, interviews, student eligibility calculation, and placement analytics endpoints are not implemented yet.
 - Local compilation and API integration tests are still pending.
