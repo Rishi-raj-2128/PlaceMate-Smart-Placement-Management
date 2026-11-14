@@ -33,7 +33,7 @@ public class JobService {
                     job.getRequiredSkills().stream().anyMatch(skill -> contains(skill, q)))
             .filter(job -> loc.isEmpty() || contains(job.getLocation(), loc))
             .filter(job -> type.isEmpty() || type.equals("all") ||
-                    job.getEmploymentType().equalsIgnoreCase(type))
+                    normalizeType(job.getEmploymentType()).equals(normalizeType(type)))
             .filter(job -> job.getDeadline() == null || !job.getDeadline().isBefore(java.time.LocalDate.now()))
             .map(JobResponse::from).toList();
     }
@@ -123,6 +123,10 @@ public class JobService {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeType(String value) {
+        return normalize(value).replace("_", " ").replace("-", " ");
     }
 
     private boolean contains(String value, String query) {
