@@ -105,9 +105,11 @@ public class Job {
         salaryMin = request.salaryMin();
         salaryMax = request.salaryMax();
         minCgpa = request.minCgpa();
-        requiredSkills = request.requiredSkills() == null ? new HashSet<>() :
-                request.requiredSkills().stream().filter(s -> s != null && !s.isBlank())
-                        .map(String::trim).collect(java.util.stream.Collectors.toSet());
+        requiredSkills.clear();
+        if (request.requiredSkills() != null) {
+            request.requiredSkills().stream().filter(s -> s != null && !s.isBlank())
+                    .map(String::trim).forEach(requiredSkills::add);
+        }
         deadline = request.deadline();
         status = JobStatus.PENDING;
         reviewNote = null;
