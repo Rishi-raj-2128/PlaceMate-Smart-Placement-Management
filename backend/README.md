@@ -1,42 +1,49 @@
 # PlaceMate Backend
 
-Spring Boot REST API for PlaceMate.
+Spring Boot REST API for PlaceMate Smart Placement Management.
 
 ## Requirements
+
 - JDK 17+
 - Maven 3.9+
 - MySQL 8+
 
-## Configure MySQL
-Create the database (or let the configured local MySQL user create it):
+## Configuration
+
+Create the database:
 
 ```sql
 CREATE DATABASE placemate_db;
 ```
 
-Set environment variables:
-- `DB_URL`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `SERVER_PORT` (default 8080)
-- `JWT_SECRET` (unique Base64 secret containing at least 32 random bytes outside local development)
-- `JWT_EXPIRATION_MS` (default 86400000 / 24 hours)
+Environment variables:
 
-Never commit real credentials or production secrets. The configured JWT fallback is for local development only.
+| Variable | Default / purpose |
+|---|---|
+| `DB_URL` | Local MySQL URL for `placemate_db` |
+| `DB_USERNAME` | `root` |
+| `DB_PASSWORD` | Empty for local development; set securely |
+| `SERVER_PORT` | `8080` |
+| `JWT_SECRET` | Development fallback only; replace with a unique Base64 secret (at least 32 random bytes) |
+| `JWT_EXPIRATION_MS` | `86400000` (24 hours) |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` |
+| `PLACEMATE_UPLOAD_DIR` | `uploads/resumes` |
 
-## Run
-From the repository root:
+Never commit real credentials or production secrets. Keep resume storage persistent and access-controlled. The local JWT fallback must never be used in production.
+
+## Run locally
 
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-Health endpoint: `GET http://localhost:8080/api/health`
+Health check: `GET http://localhost:8080/api/health`
 
-## Authentication endpoints
+## Authentication
 
 ### Student registration — POST /api/auth/register
+
 ```json
 {
   "fullName": "Aarav Sharma",
@@ -49,6 +56,7 @@ Health endpoint: `GET http://localhost:8080/api/health`
 ```
 
 ### Recruiter registration — POST /api/auth/register
+
 ```json
 {
   "fullName": "Recruiter Name",
@@ -61,6 +69,7 @@ Health endpoint: `GET http://localhost:8080/api/health`
 ```
 
 ### Login — POST /api/auth/login
+
 ```json
 {
   "email": "aarav@example.com",
@@ -68,69 +77,111 @@ Health endpoint: `GET http://localhost:8080/api/health`
 }
 ```
 
-Successful registration/login returns a signed JWT, expiry duration, and safe user summary. Password hashes are never returned.
-
-### Current user — GET /api/auth/me
-Send `Authorization: Bearer <token>`.
-
-## Authorization
-- `/api/student/**` requires STUDENT.
-- `/api/recruiter/**` requires RECRUITER.
-- `/api/admin/**` requires ADMIN.
+- GET `/api/auth/me` — current authenticated user.
+- Passwords are BCrypt-hashed. Successful registration/login returns a JWT and safe user summary.
 - Public registration accepts STUDENT and RECRUITER only. Admin accounts must be provisioned through a controlled process.
 
-## Job management API
+## Authorization
 
-- GET /api/jobs?q=&location=&type= — public search of approved, non-expired jobs.
-- GET /api/jobs/{id} — approved job details.
-- POST /api/recruiter/jobs — create a job (Recruiter JWT required). New jobs start as PENDING.
-- GET /api/recruiter/jobs — list the authenticated recruiter's postings.
-- PUT /api/recruiter/jobs/{id} — update an owned posting; edits return it to PENDING review.
-- DELETE /api/recruiter/jobs/{id} — delete an owned posting.
-- GET /api/admin/jobs/pending — list pending postings (Admin JWT required).
-- PATCH /api/admin/jobs/{id}/review — approve or reject with an optional review note.
+- `/api/student/**` — STUDENT role
+- `/api/recruiter/**` — RECRUITER role
+- `/api/admin/**` — ADMIN role
+- `/api/auth/**`, `/api/health`, and public approved job GET endpoints are permitted without a JWT.
+- `/api/notifications/**` requires any authenticated user; each query/read operation is scoped to the authenticated user.
 
-Example review body:
+Send `Authorization: Bearer <JWT>` on protected requests.
+
+## Job management
+
+| Method | Endpoint | Access |
+|---|---|---|
+| GET | `/api/jobs?q=&location=&type=` | Public approved-job search |
+| GET | `/api/jobs/{id}` | Public approved job details |
+| POST | `/api/recruiter/jobs` | Recruiter creates a job |
+| GET | `/api/recruiter/jobs` | Recruiter lists own jobs |
+| PUT | `/api/recruiter/jobs/{id}` | Recruiter updates own job; returns to PENDING |
+| DELETE | `/api/recruiter/jobs/{id}` | Recruiter deletes own job |
+| GET | `/api/admin/jobs/pending` | Admin pending queue |
+| PATCH | `/api/admin/jobs/{id}/review` | Admin approves/rejects |
+
+Only approved and non-expired jobs are publicly discoverable. Recruiters can modify only their own jobs.
+
+Review example:
 
 ```json
 {"status":"APPROVED","reviewNote":"Reviewed by placement team"}
 ```
 
-Only approved jobs are visible through public browse endpoints. Recruiters can only modify their own postings. Minimum CGPA and required skills are stored as job criteria. Student profile and eligibility matching endpoints are described below.
+## Applications
 
-## Application management API
+| Method | Endpoint | Access |
+|---|---|---|
+| POST | `/api/student/jobs/{jobId}/applications` | Student applies |
+| GET | `/api/student/applications` | Student's own application history |
+| GET | `/api/recruiter/jobs/{jobId}/applications` | Applicants for recruiter's own job |
+| PATCH | `/api/recruiter/applications/{applicationId}/status` | Recruiter updates own applicant |
 
-- POST /api/student/jobs/{jobId}/applications — apply to an approved, non-expired job (Student JWT required).
-- GET /api/student/applications — list the authenticated student's applications and current statuses.
-- GET /api/recruiter/jobs/{jobId}/applications — list applicants for a job owned by the authenticated recruiter.
-- PATCH /api/recruiter/applications/{applicationId}/status — update an application status and optional recruiter note.
+Statuses: `APPLIED`, `UNDER_REVIEW`, `SHORTLISTED`, `REJECTED`, `HIRED`. Duplicate student/job applications are prevented by a service check and database unique constraint. Recruiters cannot inspect or update another recruiter's applicants.
 
-Supported statuses: APPLIED, UNDER_REVIEW, SHORTLISTED, REJECTED, HIRED. The initial status is APPLIED. Duplicate applications for the same student/job pair are prevented by both a service check and a database unique constraint. Recruiters cannot inspect or update applications for another recruiter's jobs.
-
-Example status update body:
+Example:
 
 ```json
 {"status":"SHORTLISTED","recruiterNote":"Selected for the technical interview round"}
 ```
 
-Student-facing application history includes the job, company, applied date, current status and recruiter note. 
+## Student profile and eligibility matching
 
-## Student profile and eligibility API
+- GET `/api/student/profile`
+- PUT `/api/student/profile`
+- GET `/api/student/jobs/matches`
 
-- GET /api/student/profile — return the authenticated student's academic profile (creates an empty profile record when needed).
-- PUT /api/student/profile — update CGPA, graduation year, degree, branch, skills, and a resume URL.
-- GET /api/student/jobs/matches — return approved, non-expired jobs with eligibility and match explanations.
+The profile stores CGPA, graduation year, degree, branch, skills and a resume URL or generated uploaded-file key. Eligibility checks minimum CGPA and whether all required skills are present (case-insensitive exact skill-name comparison). The match score is a deterministic rule-based score: 50% CGPA criterion and 50% required-skill coverage. Missing profile data is treated as unknown/not satisfied and explained to the student. This is not an AI prediction.
 
-The eligibility rule checks the job's minimum CGPA and whether every required skill is present in the student's profile (case-insensitive skill-name comparison). The match percentage is a transparent rule-based score: 50% CGPA requirement score and 50% required-skill coverage score. If a job has no CGPA or skill requirement, that criterion receives full credit. Missing profile information is treated as unknown/not satisfied for eligibility and is called out in the explanation; it is not guessed. This is a deterministic MVP rule, not an AI prediction.
+## Resume upload and access
 
-The profile stores a resume URL; secure file upload and recruiter-authorized file access remain future work.
+- POST `/api/student/profile/resume` — multipart form field `file`; accepts PDF, DOC or DOCX with a 5 MB maximum.
+- GET `/api/student/resume` — authenticated student downloads their own uploaded resume.
+- GET `/api/recruiter/applications/{applicationId}/resume` — recruiter can download the resume only when the application belongs to a job owned by that recruiter.
 
-## Security and remaining work
-- Passwords are hashed using BCrypt.
-- JWT request authentication is stateless.
-- Frontend CORS currently allows local Vite origins only.
-- Add email verification, password reset, rate limiting, HTTPS, secure secret storage, and monitoring before public deployment.
-- Job posting, recruiter ownership, public approved-job search, and admin review endpoints are implemented in code; local compilation and API tests are pending.
-- Student applications, duplicate prevention, recruiter applicant lists, and status updates are implemented in code; local compile and API tests remain pending.
-- Student profile persistence and rule-based eligibility matching are implemented in code; local compile and API tests remain pending. Resume file upload, interviews, notifications, and placement analytics endpoints are not implemented yet.
-- Local compilation and API integration tests are still pending.
+Files are stored under `PLACEMATE_UPLOAD_DIR` using generated filenames. Keep this directory on persistent storage and back it up. Current validation checks size and filename extension; production deployment must add content/MIME inspection and malware scanning.
+
+## Interviews
+
+- POST `/api/recruiter/applications/{applicationId}/interviews` — schedule for an applicant on a recruiter's own job.
+- GET `/api/recruiter/interviews` — list interviews scheduled by the recruiter.
+- GET `/api/student/interviews` — list interviews for the authenticated student's applications.
+- PATCH `/api/recruiter/interviews/{id}/status?status=COMPLETED` — update status to `SCHEDULED`, `COMPLETED`, or `CANCELLED`.
+
+The schedule request contains `scheduledAt` (future ISO-8601 instant), `durationMinutes` (15–480), `mode` (`ONLINE`, `IN_PERSON`, or `PHONE`), optional `meetingLink`, `location`, and `notes`. Existing interview date/details editing and rescheduling are not exposed yet.
+
+## Notifications
+
+- GET `/api/notifications` — latest 100 notifications for the signed-in user.
+- GET `/api/notifications/unread-count`
+- PATCH `/api/notifications/{id}/read`
+- POST `/api/notifications/read-all`
+
+Notifications are generated for new applications (to the recruiter), application status changes (to the student), interview scheduling and interview status changes (to the student). Access is scoped to the authenticated recipient. Delivery is in-app only; email, SMS, push delivery and scheduled reminders are not implemented.
+
+## Admin workspace and reports
+
+- GET `/api/admin/overview` — live user, company, job and application counts.
+- GET `/api/admin/users?role=STUDENT` or `role=RECRUITER`
+- GET `/api/admin/companies`
+- PATCH `/api/admin/recruiters/{id}/company-verification` with `{"verified":true}`
+- GET `/api/admin/applications`
+- GET `/api/admin/reports/placements` — distinct hired students grouped by department.
+
+## Configuration and deployment
+
+- `application.yml` supports environment-based database, JWT, CORS, upload directory, server port and multipart size configuration.
+- `backend/Dockerfile` builds and runs the API as a non-root user.
+- Root `docker-compose.yml` starts MySQL, backend and frontend. It persists MySQL data and resume uploads in named volumes.
+- Root `.github/workflows/ci.yml` configures a frontend production build and backend Maven verification with a MySQL service.
+
+## Verification status and remaining hardening
+
+- The repository code was reviewed through GitHub. A successful CI run or local Maven/npm build was not available during this review; compile/runtime correctness is therefore **not yet confirmed**.
+- Current automated backend coverage includes a health endpoint smoke test; add domain/service/controller tests for authentication, authorization boundaries, job review, duplicate applications, profile matching, resume access, interviews and notifications.
+- Interview rescheduling/editing, email verification, password reset, email/SMS/push notifications, scheduled reminders and audit logs remain future work.
+- Add request rate limits, stronger token lifecycle/storage, HTTPS, monitoring, backup/retention policies and full security review before production.
