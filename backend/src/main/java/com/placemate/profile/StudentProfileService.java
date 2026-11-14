@@ -3,7 +3,6 @@ package com.placemate.profile;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -94,7 +93,7 @@ public class StudentProfileService {
         User user = users.findByEmailIgnoreCase(email)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account not found."));
         if (user.getRole() != Role.STUDENT) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Student access is required."));
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Student access is required.");
         }
         return user;
     }
