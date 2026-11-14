@@ -1,110 +1,45 @@
 package com.placemate.auth;
-
 import java.util.Locale;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import com.placemate.auth.dto.AuthResponse;
-import com.placemate.auth.dto.LoginRequest;
-import com.placemate.auth.dto.RegisterRequest;
-import com.placemate.user.Role;
-import com.placemate.user.User;
-import com.placemate.user.UserRepository;
-
+import com.placemate.auth.dto.*;
+import com.placemate.user.*;
 @Service
 public class AuthService {
-
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-    }
-
-    @Transactional
-    public AuthResponse register(RegisterRequest request) {
-        Role role = parsePublicRole(request.role());
-        String email = request.email().trim().toLowerCase(Locale.ROOT);
-
-        if (userRepository.existsByEmailIgnoreCase(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "An account with this email already exists.");
-        }
-
-        User user = new User(
-                request.fullName().trim(),
-                email,
-                passwordEncoder.encode(request.password()),
-                role
-        );
-
-        if (role == Role.STUDENT) {
-            if (request.enrollmentNumber() == null || request.enrollmentNumber().isBlank()
-                    || request.department() == null || request.department().isBlank()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Enrollment number and department are required for student registration.");
-            }
-            user.setEnrollmentNumber(request.enrollmentNumber().trim());
-            user.setDepartment(request.department().trim());
-        } else {
-            if (request.companyName() == null || request.companyName().isBlank()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Company name is required for recruiter registration.");
-            }
-            user.setCompanyName(request.companyName().trim());
-            if (request.companyWebsite() != null && !request.companyWebsite().isBlank()) {
-                user.setCompanyWebsite(request.companyWebsite().trim());
-            }
-        }
-
-        User saved = userRepository.save(user);
-        return createAuthResponse(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public AuthResponse login(LoginRequest request) {
-        String email = request.email().trim().toLowerCase(Locale.ROOT);
-        User user = userRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password."));
-
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
-        }
-
-        return createAuthResponse(user);
-    }
-
-    @Transactional(readOnly = true)
-    public AuthResponse.UserSummary getCurrentUser(String email) {
-        User user = userRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User account not found."));
-        return new AuthResponse.UserSummary(
-                user.getId(), user.getFullName(), user.getEmail(), user.getRole(),
-                user.getEnrollmentNumber(), user.getDepartment(),
-                user.getCompanyName(), user.getCompanyWebsite()
-        );
-    }
-
-    private AuthResponse createAuthResponse(User user) {
-        return AuthResponse.from(jwtService.generateToken(user), jwtService.getExpirationMs(), user);
-    }
-
-    private Role parsePublicRole(String value) {
-        try {
-            Role role = Role.valueOf(value.trim().toUpperCase(Locale.ROOT));
-            if (role == Role.ADMIN) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "Admin accounts are provisioned by the placement team.");
-            }
-            return role;
-        } catch (IllegalArgumentException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role must be STUDENT or RECRUITER.");
-        }
-    }
+ private final UserRepository users; private final PasswordEncoder encoder; private final JwtService jwt;
+ public AuthService(UserRepository users,PasswordEncoder encoder,JwtService jwt){this.users=users;this.encoder=encoder;this.jwt=jwt;}
+ @Transactional public AuthResponse register(RegisterRequest r) {
+  Role role=parseRole(r.role()); String email=r.email().trim().toLowerCase(Locale.ROOT);
+  if(users.existsByEmailIgnoreCase(email)) throw new ResponseStatusException(HttpStatus.CONFLICT,"An account with this email already exists.");
+  User user=new User(r.fullName().trim(),email,encoder.encode(r.password()),role);
+  if(role==Role.STUDENT) {
+   if(blank(r.enrollmentNumber())||blank(r.department())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Enrollment number and department are required for student registration.");
+   user.setEnrollmentNumber(r.enrollmentNumber().trim()); user.setDepartment(r.department().trim());
+  } else {
+   if(blank(r.companyName())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Company name is required for recruiter registration.");
+   user.setCompanyName(r.companyName().trim());
+   if(!blank(r.companyWebsite())) user.setCompanyWebsite(r.companyWebsite().trim());
+  }
+  return response(users.save(user));
+ }
+ @Transactional(readOnly=true) public AuthResponse login(LoginRequest r) {
+  String email=r.email().trim().toLowerCase(Locale.ROOT);
+  User u=users.findByEmailIgnoreCase(email).orElseThrow(()->new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid email or password."));
+  if(!encoder.matches(r.password(),u.getPassword())) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"Invalid email or password.");
+  return response(u);
+ }
+ @Transactional(readOnly=true) public AuthResponse.UserSummary currentUser(String email) {
+  User u=users.findByEmailIgnoreCase(email).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"User account not found."));
+  return summary(u);
+ }
+ private AuthResponse response(User u){return AuthResponse.from(jwt.generateToken(u),jwt.getExpirationMs(),u);}
+ private AuthResponse.UserSummary summary(User u){return new AuthResponse.UserSummary(u.getId(),u.getFullName(),u.getEmail(),u.getRole(),u.getEnrollmentNumber(),u.getDepartment(),u.getCompanyName(),u.getCompanyWebsite());}
+ private boolean blank(String s){return s==null||s.isBlank();}
+ private Role parseRole(String s) {
+  try {Role role=Role.valueOf(s.trim().toUpperCase(Locale.ROOT)); if(role==Role.ADMIN) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Admin accounts are provisioned by the placement team."); return role;}
+  catch(IllegalArgumentException ex){throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Role must be STUDENT or RECRUITER.");}
+ }
 }
