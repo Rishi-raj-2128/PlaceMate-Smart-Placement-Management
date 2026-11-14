@@ -12,6 +12,7 @@ import {
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from 'recharts'
 import { authApi, jobApi } from './services/api.js'
 import { RecruiterJobsPage, PostJobPage, JobApprovalsPage } from './pages/JobManagement.jsx'
+import { StudentApplicationsPage, RecruiterApplicantsPage } from './pages/ApplicationPages.jsx'
 
 const jobs = [
   { id: 1, company: 'Microsoft', role: 'Software Engineer', place: 'Bengaluru · Hybrid', salary: '₹18–24 LPA', cgpa: '7.5+', skills: ['Java', 'DSA', 'OOP'], days: '3 days left', color: '#2563eb', logo: 'M', match: 96, type: 'Full-time' },
@@ -197,10 +198,10 @@ export default function App(){
    <Route path="/dashboard" element={<Dashboard role={role}/>}/>
    <Route path="/jobs" element={role === "Recruiter" ? <RecruiterJobsPage/> : <JobsPage allowApply={role === "Student"}/>}/>
    <Route path="/recommended" element={<JobsPage title="Recommended for you" allowApply={role === "Student"}/>}/>
-   <Route path="/applications" element={<Applications/>}/>
+   <Route path="/applications" element={role === "Student" ? <StudentApplicationsPage/> : <GenericPage title="Applications" description="Application tracking is available in the student workspace." icon={FileText}/>}/>
    <Route path="/profile" element={<Profile/>}/>
    <Route path="/post-job" element={<PostJobPage/>}/>
-   <Route path="/applicants" element={<GenericPage title="Applicants" description="Review candidates and manage your hiring pipeline." icon={Users}/>}/>
+   <Route path="/applicants" element={role === "Recruiter" ? <RecruiterApplicantsPage/> : <GenericPage title="Applicants" description="Applicant management is available in the recruiter workspace." icon={Users}/>}/>
    <Route path="/interviews" element={<GenericPage title="Interviews" description="Keep every interview schedule and update organized." icon={CalendarDays}/>}/>
    <Route path="/students" element={<GenericPage title="Students" description="Manage student profiles and placement readiness." icon={GraduationCap}/>}/>
    <Route path="/recruiters" element={<GenericPage title="Recruiters" description="Manage recruiter access and activity." icon={Users}/>}/>
