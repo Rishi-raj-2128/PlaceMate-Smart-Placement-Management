@@ -49,4 +49,33 @@ export const profileApi = {
   matches: () => api.get('/student/jobs/matches'),
 }
 
+export const interviewApi = {
+  student: () => api.get('/student/interviews'),
+  recruiter: () => api.get('/recruiter/interviews'),
+  schedule: (applicationId, payload) => api.post(`/recruiter/applications/${applicationId}/interviews`, payload),
+  updateStatus: (id, status) => api.patch(`/recruiter/interviews/${id}/status`, null, { params: { status } }),
+}
+
+export const notificationApi = {
+  list: () => api.get('/notifications'),
+  unreadCount: () => api.get('/notifications/unread-count'),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllRead: () => api.post('/notifications/read-all'),
+}
+
+export const adminApi = {
+  overview: () => api.get('/admin/overview'),
+  users: (role) => api.get('/admin/users', { params: { role } }),
+  companies: () => api.get('/admin/companies'),
+  verifyCompany: (id, verified) => api.patch(`/admin/recruiters/${id}/company-verification`, { verified }),
+  applications: () => api.get('/admin/applications'),
+  placements: () => api.get('/admin/reports/placements'),
+}
+
+export const resumeApi = {
+  upload: (file) => { const data = new FormData(); data.append('file', file); return api.post('/student/profile/resume', data, { headers: { 'Content-Type': 'multipart/form-data' } }) },
+  studentDownload: () => api.get('/student/resume', { responseType: 'blob' }),
+  recruiterDownload: (applicationId) => api.get(`/recruiter/applications/${applicationId}/resume`, { responseType: 'blob' }),
+}
+
 export default api
