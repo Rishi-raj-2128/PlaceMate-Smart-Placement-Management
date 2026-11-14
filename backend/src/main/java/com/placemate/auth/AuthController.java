@@ -38,6 +38,6 @@ public class AuthController {
 
     @GetMapping("/me")
     public AuthResponse.UserSummary me(Authentication authentication) {
-        return authService.getCurrentUser(authentication.getName());
+        return authService.currentUser(authentication.getName());
     }
 }
