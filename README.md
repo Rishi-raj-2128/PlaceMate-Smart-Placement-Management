@@ -77,7 +77,7 @@ The Vite app defaults to `http://localhost:5173`. The API client defaults to `ht
 | Student profile | CGPA, graduation year, degree, branch, skills and resume reference |
 | Eligibility matching | Deterministic rule-based eligibility and match percentage with explanations; not an AI prediction |
 | Resume files | PDF/DOC/DOCX upload (5 MB limit), student download and recruiter download restricted to applicants for the recruiter's own jobs |
-| Interviews | Recruiter schedules an interview with date/time, duration, mode, meeting link/location and notes; recruiter can mark it completed or cancelled; students can view their schedule |
+| Interviews | Recruiter schedules and reschedules an interview with date/time, duration, mode, meeting link/location and notes; recruiter can mark it completed or cancelled; students can view their schedule |
 | Notifications | In-app notification centre, unread count, mark-one-read and mark-all-read; generated for new applications, application status changes and interview events |
 | Admin workspace | Student/recruiter lists, recruiter company verification, company summaries, placement metrics, department hiring report and CSV application export |
 | Dashboards | Student, recruiter and admin summary cards and recent activity now request API data |
@@ -132,9 +132,9 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 
 - The latest GitHub commit was inspected, but no successful CI run or local frontend/backend build result was available during this review. Treat compilation, database migrations, browser behavior and full end-to-end flows as **not yet verified** until the GitHub Actions run completes and the application is exercised against MySQL.
 - The CI workflow currently includes a frontend build and backend Maven verification plus a backend health smoke test; domain-level automated tests are still limited.
-- Interview creation and completion/cancellation are implemented; editing/rescheduling an existing interview's date/details is not yet exposed.
+- Interview scheduling, rescheduling and completion/cancellation are implemented; students receive an in-app notification when interview details change.
 - Notifications are in-app only. Email/SMS delivery, push notifications and scheduled reminders are not implemented.
-- Resume upload currently validates the filename extension and size. Production hardening should add file-content/MIME inspection, malware scanning, storage outside the application container or in object storage, retention/deletion controls, and backups.
+- Resume upload validates file size, extension and basic PDF/DOC/DOCX signatures/container structure; downloads are scoped to the owning student and recruiter-owned applicant records. Production hardening should add comprehensive MIME inspection, malware scanning, object storage, retention/deletion controls, and backups.
 - Dashboard metrics use live API data, but the landing-page mock preview and sample illustration content remain static.
 - Email verification, password reset, audit logs, rate limiting, production HTTPS/reverse-proxy hardening and a full automated security review remain outstanding.
 - JWT is stored in browser local storage in this MVP. Revisit token storage and refresh/revocation strategy before production.
