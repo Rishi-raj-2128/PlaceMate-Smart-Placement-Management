@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @AutoConfigureMockMvc
 class AuthSecurityIntegrationTest {
     @Autowired MockMvc mvc;
-    @Autowired ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired UserRepository users;
 
     private String suffix;
