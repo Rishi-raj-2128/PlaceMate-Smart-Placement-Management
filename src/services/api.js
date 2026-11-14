@@ -14,9 +14,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && localStorage.getItem('placemate_token')) {
       localStorage.removeItem('placemate_token')
       localStorage.removeItem('placemate_user')
+      window.dispatchEvent(new Event('placemate:unauthorized'))
     }
     return Promise.reject(error)
   },
