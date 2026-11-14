@@ -30,16 +30,12 @@ class AuthServiceTest {
     @Mock private JwtService jwt;
     @InjectMocks private AuthService service;
 
-    @BeforeEach
-    void setUp() {
-        when(jwt.generateToken(any(User.class))).thenReturn("test.jwt.token");
-        when(jwt.getExpirationMs()).thenReturn(86_400_000L);
-    }
-
     @Test
     void studentRegistrationNormalizesEmailAndHashesPassword() {
         when(users.existsByEmailIgnoreCase("student@example.com")).thenReturn(false);
         when(encoder.encode("StrongPass123")).thenReturn("hashed-password");
+        when(jwt.generateToken(any(User.class))).thenReturn("test.jwt.token");
+        when(jwt.getExpirationMs()).thenReturn(86_400_000L);
         when(users.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         AuthResponse response = service.register(new RegisterRequest(
