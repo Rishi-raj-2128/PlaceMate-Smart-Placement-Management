@@ -79,7 +79,7 @@ class ResumeControllerTest {
         var profileCaptor = org.mockito.ArgumentCaptor.forClass(StudentProfile.class);
         verify(profiles).save(profileCaptor.capture());
         String storedName = profileCaptor.getValue().getResumeUrl();
-        assertTrue(storedName.matches("11-[0-9a-fA-F-]{36}\\\\.pdf"));
+        assertTrue(storedName.matches("11-[0-9a-fA-F-]{36}\\.pdf"));
         assertArrayEquals(pdf, Files.readAllBytes(uploadDir.resolve(storedName)));
     }
 
@@ -133,7 +133,6 @@ class ResumeControllerTest {
         when(applications.findById(90L)).thenReturn(Optional.of(application));
         when(application.getJob()).thenReturn(job);
         when(job.getCreatedBy()).thenReturn(recruiter);
-        when(recruiter.getId()).thenReturn(22L);
         when(application.getStudent()).thenReturn(student);
         when(student.getId()).thenReturn(11L);
         when(profiles.findByUser_Id(11L)).thenReturn(Optional.of(profile));
