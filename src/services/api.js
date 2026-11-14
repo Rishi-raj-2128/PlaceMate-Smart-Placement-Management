@@ -28,4 +28,15 @@ export const authApi = {
   me: () => api.get('/auth/me'),
 }
 
+export const jobApi = {
+  browse: (params = {}) => api.get('/jobs', { params }),
+  get: (id) => api.get(`/jobs/${id}`),
+  mine: () => api.get('/recruiter/jobs'),
+  create: (payload) => api.post('/recruiter/jobs', payload),
+  update: (id, payload) => api.put(`/recruiter/jobs/${id}`, payload),
+  remove: (id) => api.delete(`/recruiter/jobs/${id}`),
+  pending: () => api.get('/admin/jobs/pending'),
+  review: (id, payload) => api.patch(`/admin/jobs/${id}/review`, payload),
+}
+
 export default api
