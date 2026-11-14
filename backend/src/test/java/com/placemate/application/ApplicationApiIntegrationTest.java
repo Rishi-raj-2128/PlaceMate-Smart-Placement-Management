@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.placemate.job.Job;
 import com.placemate.job.JobRepository;
 import com.placemate.job.JobStatus;
+import com.placemate.notification.NotificationRepository;
 import com.placemate.user.User;
 import com.placemate.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +30,7 @@ class ApplicationApiIntegrationTest {
     @Autowired UserRepository users;
     @Autowired JobRepository jobs;
     @Autowired ApplicationRepository applications;
+    @Autowired NotificationRepository notifications;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private String suffix;
@@ -72,10 +74,12 @@ class ApplicationApiIntegrationTest {
     @AfterEach
     void cleanUp() {
         users.findByEmailIgnoreCase(studentEmail).ifPresent(student -> {
+            notifications.deleteAll(notifications.findTop100ByUser_IdOrderByCreatedAtDesc(student.getId()));
             applications.deleteAll(applications.findByStudentIdOrderByAppliedAtDesc(student.getId()));
             users.delete(student);
         });
         users.findByEmailIgnoreCase(recruiterEmail).ifPresent(recruiter -> {
+            notifications.deleteAll(notifications.findTop100ByUser_IdOrderByCreatedAtDesc(recruiter.getId()));
             jobs.findByCreatedByIdOrderByCreatedAtDesc(recruiter.getId()).forEach(jobs::delete);
             users.delete(recruiter);
         });
