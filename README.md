@@ -98,7 +98,7 @@ The frontend stores the returned access token in browser local storage and sends
 | JWT generation and request authentication | Implemented in backend |
 | Role-based API authorization | Implemented for student/recruiter/admin API path prefixes |
 | Current-user endpoint | Implemented |
-| Jobs, applications, interviews, placement analytics APIs | Not implemented yet |
+| Job create/edit/delete and approval APIs | Implemented in code; local testing pending |\n| Public approved-job search and filters | Implemented in code; local testing pending |\n| Applications, interviews, placement analytics APIs | Not implemented yet |
 | Live dashboard data | Still uses clearly illustrative frontend fixtures |
 | Email verification and password reset | Not implemented |
 | Automated build / integration tests | Pending local execution |
@@ -108,11 +108,20 @@ The frontend stores the returned access token in browser local storage and sends
 - **Frontend foundation:** landing page, responsive dashboards, navigation, charts, and UI components.
 - **Backend foundation:** Spring Boot, MySQL/JPA configuration, CORS, and health endpoint.
 - **Authentication:** registration, login, BCrypt, JWT, current-user endpoint, and role-based API authorization.
-- **Frontend integration:** Axios API client, real registration/login requests, token persistence, session restoration, logout, and API error/loading states.
+- **Frontend integration:** Axios API client, real registration/login requests, token persistence, session restoration, logout, and API error/loading states.\n- **Job management:** recruiter-owned job creation, editing and deletion; public approved-job search; admin approve/reject queue; job review notes. React screens are connected to these endpoints.
 
 ## Important notes
 
 - Admin accounts must be provisioned by the placement team; there is no public Admin signup.
-- Job listings, applications, profile content, and dashboard metrics are still demo fixtures until their backend APIs are built.
-- Compilation, database connectivity, and end-to-end authentication have **not yet been verified on a local machine**. Run both apps locally and test before treating this as production-ready.
+- Job listings now use the backend API on the student browse screen. Application submission, detailed student eligibility matching, profile content, and dashboard metrics still need backend implementation; some dashboard data remains illustrative.
+- Compilation, database connectivity, and end-to-end flows (authentication and job management) have **not yet been verified on a local machine**. Run both apps locally and test before treating this as production-ready.
 - Before production: configure HTTPS, unique secrets, rate limiting, email verification, password recovery, audit logging, and secure token storage.
+
+
+## Remaining development roadmap
+
+1. **Applications:** student apply workflow, duplicate-application prevention, recruiter applicant list, status updates and application timeline.
+2. **Student profile:** persistent education, CGPA, skills, resume upload and eligibility matching against job criteria.
+3. **Interviews and notifications:** interview scheduling, status notifications and reminders.
+4. **Admin workspace:** student/recruiter management, company verification, placement analytics and reports.
+5. **Production readiness:** automated backend/frontend tests, validation and security review, deployment configuration, logging and documentation.
