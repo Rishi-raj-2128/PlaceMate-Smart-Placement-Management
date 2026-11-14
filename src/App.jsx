@@ -204,7 +204,7 @@ function Profile(){
  }
  if(loading)return <div className="panel empty-state">Loading your profile...</div>
  return <>
-  <PageHeading eyebrow="YOUR IDENTITY" title="My profile" description="Keep your academic details and skills up to date to get more accurate job matches."/>
+  <PageHeading eyebrow="YOUR IDENTITY" title="My profile" description="Keep your academic details and skills up to date to get more accurate job matches." action={<button type="button" className="btn btn-primary" onClick={()=>{const editor=document.querySelector('.student-profile-form input[name="cgpa"]');editor?.scrollIntoView({behavior:'smooth',block:'center'});editor?.focus({preventScroll:true})}}><FileText size={15}/> Edit profile</button>}/>
   {error&&<div className="auth-error">{error}</div>}
   <div className="profile-page-grid">
    <section className="panel profile-hero-card"><div className="profile-cover"/><div className="profile-person"><div className="profile-avatar">{(profile?.fullName||'S').charAt(0).toUpperCase()}</div><div><h2>{profile?.fullName||'Student'}</h2><p>{profile?.degree||'Degree not added'} · {profile?.branch||profile?.department||'Department not added'}</p><span><Mail size={13}/>{profile?.email}</span></div><span className="status-badge blue">Student account</span></div>
