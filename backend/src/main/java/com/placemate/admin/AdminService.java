@@ -44,10 +44,15 @@ public class AdminService {
  public List<ApplicationResponse> applications(){return applications.findAll().stream().sorted(Comparator.comparing(Application::getAppliedAt).reversed()).map(ApplicationResponse::from).toList();}
  @Transactional(readOnly=true)
  public List<DepartmentPlacementReport> placements(){
-  Map<String,Long> totals=applications.findAll().stream().filter(a->a.getStatus()==ApplicationStatus.HIRED)
-   .collect(Collectors.groupingBy(a->{String d=a.getStudent().getDepartment();return d==null||d.isBlank()?"Not specified":d;},Collectors.mapping(a->a.getStudent().getId(),Collectors.collectingAndThen(Collectors.toSet(),Set::size))).entrySet().stream()
-   .collect(Collectors.toMap(Map.Entry::getKey,e->e.getValue().longValue()));
-  return totals.entrySet().stream().map(e->new DepartmentPlacementReport(e.getKey(),e.getValue()))
+  Map<String,Set<Long>> studentsByDepartment=new HashMap<>();
+  for(Application application:applications.findAll()){
+   if(application.getStatus()!=ApplicationStatus.HIRED)continue;
+   String department=application.getStudent().getDepartment();
+   if(department==null||department.isBlank())department="Not specified";
+   studentsByDepartment.computeIfAbsent(department,key->new HashSet<>()).add(application.getStudent().getId());
+  }
+  return studentsByDepartment.entrySet().stream()
+   .map(entry->new DepartmentPlacementReport(entry.getKey(),entry.getValue().size()))
    .sorted(Comparator.comparingLong(DepartmentPlacementReport::hiredStudents).reversed()).toList();
  }
  @Transactional
