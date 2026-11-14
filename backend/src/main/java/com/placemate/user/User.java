@@ -15,7 +15,7 @@ public class User {
  @Column(length=100) private String department;
  @Column(length=150) private String companyName;
  @Column(length=255) private String companyWebsite;
- @Column(nullable=false) private boolean companyVerified=false;
+ @Column(nullable=false, columnDefinition="boolean default false") private boolean companyVerified=false;
  @Column(nullable=false,updatable=false) private Instant createdAt;
  protected User() {}
  public User(String fullName,String email,String password,Role role) {
