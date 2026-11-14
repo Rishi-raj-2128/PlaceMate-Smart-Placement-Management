@@ -27,3 +27,10 @@ management:
 logging:
   level:
     com.placemate: INFO
+
+# Use a unique, randomly generated Base64 secret outside local development.
+# The fallback is only for local development and must never be used in production.
+app:
+  jwt:
+    secret: ${JWT_SECRET:bG9jYWwtZGV2LW9ubHktcGxhY2VtYXRlLWp3dC1zZWNyZXQta2V5LTIwMjY=}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
