@@ -121,5 +121,6 @@ Student-facing application history includes the job, company, applied date, curr
 - Frontend CORS currently allows local Vite origins only.
 - Add email verification, password reset, rate limiting, HTTPS, secure secret storage, and monitoring before public deployment.
 - Job posting, recruiter ownership, public approved-job search, and admin review endpoints are implemented in code; local compilation and API tests are pending.
-- Student applications, duplicate prevention, recruiter applicant lists, and status updates are implemented in code; local compile and API tests remain pending.\n- Interviews, student eligibility calculation, and placement analytics endpoints are not implemented yet.
+- Student applications, duplicate prevention, recruiter applicant lists, and status updates are implemented in code; local compile and API tests remain pending.
+- Interviews, student eligibility calculation, and placement analytics endpoints are not implemented yet.
 - Local compilation and API integration tests are still pending.
