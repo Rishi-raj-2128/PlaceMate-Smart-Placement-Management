@@ -98,11 +98,28 @@ Example review body:
 
 Only approved jobs are visible through public browse endpoints. Recruiters can only modify their own postings. Minimum CGPA and required skills are stored as job criteria; personal eligibility calculation awaits persistent student profile fields.
 
+## Application management API
+
+- POST /api/student/jobs/{jobId}/applications — apply to an approved, non-expired job (Student JWT required).
+- GET /api/student/applications — list the authenticated student's applications and current statuses.
+- GET /api/recruiter/jobs/{jobId}/applications — list applicants for a job owned by the authenticated recruiter.
+- PATCH /api/recruiter/applications/{applicationId}/status — update an application status and optional recruiter note.
+
+Supported statuses: APPLIED, UNDER_REVIEW, SHORTLISTED, REJECTED, HIRED. The initial status is APPLIED. Duplicate applications for the same student/job pair are prevented by both a service check and a database unique constraint. Recruiters cannot inspect or update applications for another recruiter's jobs.
+
+Example status update body:
+
+```json
+{"status":"SHORTLISTED","recruiterNote":"Selected for the technical interview round"}
+```
+
+Student-facing application history includes the job, company, applied date, current status and recruiter note. Student profile fields for CGPA and skills are not yet persisted, so automatic eligibility scoring is not implemented in this milestone.
+
 ## Security and remaining work
 - Passwords are hashed using BCrypt.
 - JWT request authentication is stateless.
 - Frontend CORS currently allows local Vite origins only.
 - Add email verification, password reset, rate limiting, HTTPS, secure secret storage, and monitoring before public deployment.
 - Job posting, recruiter ownership, public approved-job search, and admin review endpoints are implemented in code; local compilation and API tests are pending.
-- Applications, interviews, student eligibility calculation, and placement analytics endpoints are not implemented yet.
+- Student applications, duplicate prevention, recruiter applicant lists, and status updates are implemented in code; local compile and API tests remain pending.\n- Interviews, student eligibility calculation, and placement analytics endpoints are not implemented yet.
 - Local compilation and API integration tests are still pending.
