@@ -77,7 +77,7 @@ class ResumeControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         var profileCaptor = org.mockito.ArgumentCaptor.forClass(StudentProfile.class);
-        verify(profiles).save(profileCaptor.capture());
+        verify(profiles, times(2)).save(profileCaptor.capture());
         String storedName = profileCaptor.getValue().getResumeUrl();
         assertTrue(storedName.matches("11-[0-9a-fA-F-]{36}\\.pdf"));
         assertArrayEquals(pdf, Files.readAllBytes(uploadDir.resolve(storedName)));
