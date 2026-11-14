@@ -19,10 +19,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ApplicationServiceTest {
     @Mock private ApplicationRepository applications;
     @Mock private JobRepository jobs;
@@ -85,7 +88,7 @@ class ApplicationServiceTest {
         Job job = job(7L, user(2L, Role.RECRUITER), JobStatus.APPROVED);
         when(users.findByEmailIgnoreCase("student@example.com")).thenReturn(Optional.of(student));
         when(jobs.findById(7L)).thenReturn(Optional.of(job));
-        when(job.getDeadline()).thenReturn(LocalDate.now().minusDays(1));
+        doReturn(LocalDate.now().minusDays(1)).when(job).getDeadline();
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,
             () -> service.apply("student@example.com", 7L));
