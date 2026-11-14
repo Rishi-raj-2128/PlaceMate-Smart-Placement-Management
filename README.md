@@ -132,7 +132,7 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 ## Known limitations and verification status
 
 - GitHub Actions passed on commit `34833d86ea48`: frontend production build, backend Maven verification against MySQL, backend health smoke test, Docker Compose validation and Nginx configuration validation. Browser-based end-to-end flows and a deployed production environment have not yet been exercised.
-- Backend automated tests include the health endpoint smoke test, service/controller unit coverage across jobs, authentication, applications, profiles, resumes, interviews and notifications, plus MockMvc integration tests for authentication/security, recruiter job API access boundaries, and application lifecycle/ownership. Full browser-based end-to-end flows and deployed production verification remain outstanding.
+- Backend automated tests include the health endpoint smoke test, service/controller unit coverage across jobs, authentication, applications, profiles, resumes, interviews and notifications, plus MockMvc integration tests for authentication/security, recruiter job API access boundaries, application lifecycle/ownership, and student profile/job-matching endpoints. Full browser-based end-to-end flows and deployed production verification remain outstanding.
 - Interview scheduling, rescheduling and completion/cancellation are implemented; students receive an in-app notification when interview details change.
 - Notifications are in-app only. Email/SMS delivery, push notifications and scheduled reminders are not implemented.
 - Resume upload validates file size, extension and basic PDF/DOC/DOCX signatures/container structure; downloads are scoped to the owning student and recruiter-owned applicant records. Production hardening should add comprehensive MIME inspection, malware scanning, object storage, retention/deletion controls, and backups.
@@ -143,7 +143,7 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 ## Remaining work before production
 
 - Automated browser end-to-end coverage for complete student, recruiter and admin journeys.
-- Additional API integration tests for profile/matching, resume access, interviews, notifications and admin reporting.
+- Additional API integration tests for resume access, interviews, notifications and admin reporting.
 - Email verification, password reset and account recovery.
 - Hardened JWT storage/lifecycle with refresh and revocation controls.
 - Comprehensive resume MIME inspection, malware scanning, retention/deletion controls and production object storage.
