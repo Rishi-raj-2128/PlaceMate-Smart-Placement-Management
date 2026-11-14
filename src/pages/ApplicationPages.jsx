@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { BriefcaseBusiness, CheckCircle2, Clock3, Users } from 'lucide-react'
-import { jobApi } from '../services/api.js'
+import { Link, useSearchParams } from 'react-router-dom'
+import { BriefcaseBusiness, CheckCircle2, Clock3, Users, CalendarDays, FileText } from 'lucide-react'
+import { jobApi, resumeApi } from '../services/api.js'
 
 const statusTone = status => ({
   APPLIED:'blue', UNDER_REVIEW:'purple', SHORTLISTED:'green',
@@ -90,7 +90,8 @@ export function RecruiterApplicantsPage() {
         <div className="applicant-list">{items.map(item=><article className="panel applicant-card" key={item.id}>
           <div className="applicant-avatar">{(item.studentName||'S').charAt(0).toUpperCase()}</div>
           <div className="applicant-details"><div className="applicant-heading"><div><h3>{item.studentName}</h3><p>{item.studentEmail}</p></div><span className={'status-badge '+statusTone(item.status)}>{prettyStatus(item.status)}</span></div>
-            <div className="applicant-meta"><span>{item.enrollmentNumber||'Enrollment not provided'}</span><span>{item.department||'Department not provided'}</span><span>Applied {dateLabel(item.appliedAt)}</span></div>
+            <div className="applicant-meta"><span>Application #{item.id}</span><span>{item.enrollmentNumber||'Enrollment not provided'}</span><span>{item.department||'Department not provided'}</span><span>Applied {dateLabel(item.appliedAt)}</span></div>
+            <div className="applicant-workflow-actions"><Link className="btn btn-outline" to={'/interviews?applicationId='+item.id}><CalendarDays size={14}/> Schedule interview</Link><button className="btn btn-outline" onClick={async()=>{try{const response=await resumeApi.recruiterDownload(item.id);const url=URL.createObjectURL(response.data);const a=document.createElement('a');a.href=url;a.download='candidate-resume-'+item.id;a.click();URL.revokeObjectURL(url)}catch(err){setError(err.response?.data?.message||'Resume is not available for this candidate.')}}}><FileText size={14}/> Download resume</button></div>
             <div className="applicant-actions"><input aria-label="Recruiter note" value={notes[item.id]??item.recruiterNote??''} onChange={e=>setNotes(current=>({...current,[item.id]:e.target.value}))} placeholder="Optional note for student"/><select aria-label="Application status" value={item.status} disabled={savingId===item.id} onChange={e=>updateStatus(item.id,e.target.value)}>{['APPLIED','UNDER_REVIEW','SHORTLISTED','REJECTED','HIRED'].map(status=><option key={status} value={status} disabled={status==='APPLIED'}>{prettyStatus(status)}</option>)}</select><span>{savingId===item.id?'Saving...':'Update status'}</span></div>
           </div>
         </article>)}</div>}
