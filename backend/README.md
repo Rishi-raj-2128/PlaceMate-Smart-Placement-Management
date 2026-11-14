@@ -182,7 +182,7 @@ Notifications are generated for new applications (to the recruiter), application
 
 ## Verification status and remaining hardening
 
-- The repository code was reviewed through GitHub. A successful CI run or local Maven/npm build was not available during this review; compile/runtime correctness is therefore **not yet confirmed**.
+- GitHub Actions passed on commit `55399ce27830`: Maven verification against MySQL, the backend health endpoint test, frontend production build, Docker Compose validation, and Nginx configuration validation. Full API/browser end-to-end testing and production deployment verification remain outstanding.
 - Current automated backend coverage includes a health endpoint smoke test; add domain/service/controller tests for authentication, authorization boundaries, job review, duplicate applications, profile matching, resume access, interviews and notifications.
 - Interview rescheduling/editing, email verification, password reset, email/SMS/push notifications, scheduled reminders and audit logs remain future work.
 - Add request rate limits, stronger token lifecycle/storage, HTTPS, monitoring, backup/retention policies and full security review before production.
