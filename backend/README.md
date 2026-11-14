@@ -184,5 +184,5 @@ Notifications are generated for new applications (to the recruiter), application
 
 - GitHub Actions passed on commit `55399ce27830`: Maven verification against MySQL, the backend health endpoint test, frontend production build, Docker Compose validation, and Nginx configuration validation. Full API/browser end-to-end testing and production deployment verification remain outstanding.
 - Current automated backend coverage includes a health endpoint smoke test; add domain/service/controller tests for authentication, authorization boundaries, job review, duplicate applications, profile matching, resume access, interviews and notifications.
-- Interview rescheduling/editing, email verification, password reset, email/SMS/push notifications, scheduled reminders and audit logs remain future work.
-- Add request rate limits, stronger token lifecycle/storage, HTTPS, monitoring, backup/retention policies and full security review before production.
+- Interview rescheduling is implemented for scheduled interviews. Email verification, password reset, email/SMS/push notifications, scheduled reminders and audit logs remain future work.
+- Nginx currently rate limits login and registration; add broader API rate limits, stronger token lifecycle/storage, HTTPS, monitoring, backup/retention policies and a full security review before production.
