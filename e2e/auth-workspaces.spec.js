@@ -43,7 +43,7 @@ test('recruiter can register and reach the recruiter workspace', async ({ page }
   await expect(page).toHaveURL(/\/dashboard$/)
   await expect(page.getByRole('heading', { name: 'Recruiter workspace' })).toBeVisible()
   await expect(page.getByText('Recruiter account')).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Post a job' })).toBeVisible()
+  await expect(page.getByRole('navigation').getByRole('link', { name: 'Post a job' })).toBeVisible()
 })
 
 test('guest is redirected to login when opening a protected workspace route', async ({ page }) => {
