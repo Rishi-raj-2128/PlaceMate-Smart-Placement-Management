@@ -42,7 +42,8 @@ public class JobService {
     public JobResponse getPublicJob(Long id) {
         Job job = jobs.findById(id)
             .filter(j -> j.getStatus() == JobStatus.APPROVED)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Approved job not found."));
+            .filter(j -> j.getDeadline() == null || !j.getDeadline().isBefore(java.time.LocalDate.now()))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Approved, non-expired job not found."));
         return JobResponse.from(job);
     }
 
