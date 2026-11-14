@@ -126,19 +126,29 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 - **Interviews and notifications:** interview scheduling/status and event-triggered in-app notifications.
 - **Admin workspace:** user/company lists, company verification, overview metrics and placement reporting.
 - **Operational setup:** CI workflow, health endpoint, Dockerfiles, Compose and Nginx configuration.
-- **Backend test coverage:** added focused service/controller tests plus MockMvc integration coverage for JWT authentication, role isolation, recruiter job creation/listing, and public visibility rules for pending jobs.
+- **Backend test coverage:** added focused service/controller tests plus MockMvc integration coverage for JWT authentication, role isolation, recruiter job creation/listing, public visibility rules for pending jobs, and the student application-to-recruiter-review lifecycle.
 - **README refresh:** setup, API groups, current feature scope, verification and deployment notes updated.
 
 ## Known limitations and verification status
 
 - GitHub Actions passed on commit `34833d86ea48`: frontend production build, backend Maven verification against MySQL, backend health smoke test, Docker Compose validation and Nginx configuration validation. Browser-based end-to-end flows and a deployed production environment have not yet been exercised.
-- Backend automated tests include the health endpoint smoke test, service/controller unit coverage across jobs, authentication, applications, profiles, resumes, interviews and notifications, plus MockMvc integration tests for authentication/security and recruiter job API access boundaries. Full browser-based end-to-end flows and deployed production verification remain outstanding.
+- Backend automated tests include the health endpoint smoke test, service/controller unit coverage across jobs, authentication, applications, profiles, resumes, interviews and notifications, plus MockMvc integration tests for authentication/security, recruiter job API access boundaries, and application lifecycle/ownership. Full browser-based end-to-end flows and deployed production verification remain outstanding.
 - Interview scheduling, rescheduling and completion/cancellation are implemented; students receive an in-app notification when interview details change.
 - Notifications are in-app only. Email/SMS delivery, push notifications and scheduled reminders are not implemented.
 - Resume upload validates file size, extension and basic PDF/DOC/DOCX signatures/container structure; downloads are scoped to the owning student and recruiter-owned applicant records. Production hardening should add comprehensive MIME inspection, malware scanning, object storage, retention/deletion controls, and backups.
 - Dashboard metrics use live API data, but the landing-page mock preview and sample illustration content remain static.
 - Email verification, password reset, audit logs, broader API rate limiting, production HTTPS/reverse-proxy hardening and a full automated security review remain outstanding. Nginx currently applies an edge rate limit to login and registration only.
 - JWT is stored in browser local storage in this MVP. Revisit token storage and refresh/revocation strategy before production.
+
+## Remaining work before production
+
+- Automated browser end-to-end coverage for complete student, recruiter and admin journeys.
+- Additional API integration tests for profile/matching, resume access, interviews, notifications and admin reporting.
+- Email verification, password reset and account recovery.
+- Hardened JWT storage/lifecycle with refresh and revocation controls.
+- Comprehensive resume MIME inspection, malware scanning, retention/deletion controls and production object storage.
+- Audit logs, broader API rate limits, monitoring/alerting, backup/restore drills and deployed HTTPS verification.
+- Full production security review and operational validation.
 
 ## Security configuration
 
