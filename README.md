@@ -30,7 +30,8 @@ PlaceMate is a role-based placement management platform for students, recruiters
 - **Database:** MySQL 8+
 - **Authentication:** BCrypt password hashing and stateless JWT
 - **Deployment:** Docker, Docker Compose, Nginx
-- **CI:** GitHub Actions (frontend production build and backend Maven verification)
+- **Browser testing:** Playwright (Chromium) for student/recruiter registration, student login, guest route protection and Admin self-registration denial
+- **CI:** GitHub Actions (frontend production build, backend Maven verification and browser end-to-end tests)
 
 ## Run locally
 
@@ -126,13 +127,14 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 - **Interviews and notifications:** interview scheduling/status and event-triggered in-app notifications.
 - **Admin workspace:** user/company lists, company verification, overview metrics and placement reporting.
 - **Operational setup:** CI workflow, health endpoint, Dockerfiles, Compose and Nginx configuration.
+- **Browser E2E coverage:** added Playwright Chromium journeys for student registration/login/logout, recruiter registration, guest route protection and Admin self-registration denial.
 - **Backend test coverage:** added focused service/controller tests plus MockMvc integration coverage for JWT authentication, role isolation, recruiter job creation/listing, public visibility rules for pending jobs, the student application-to-recruiter-review lifecycle, profile updates/job matching, resume upload/download access controls, interview scheduling/rescheduling/status and ownership controls, notification recipient/read flows, and admin reporting/company verification APIs.
 - **README refresh:** setup, API groups, current feature scope, verification and deployment notes updated.
 
 ## Known limitations and verification status
 
-- GitHub Actions passed on commit `34833d86ea48`: frontend production build, backend Maven verification against MySQL, backend health smoke test, Docker Compose validation and Nginx configuration validation. Browser-based end-to-end flows and a deployed production environment have not yet been exercised.
-- Backend automated tests include the health endpoint smoke test, service/controller unit coverage across jobs, authentication, applications, profiles, resumes, interviews and notifications, plus MockMvc integration tests for authentication/security, recruiter job API access boundaries, application lifecycle/ownership, and student profile/job-matching endpoints. Full browser-based end-to-end flows and deployed production verification remain outstanding.
+- GitHub Actions passed on commit `34833d86ea48`: frontend production build, backend Maven verification against MySQL, backend health smoke test, Docker Compose validation and Nginx configuration validation. The browser-based end-to-end suite now runs in CI; a deployed production environment has not yet been exercised.
+- Backend automated tests include the health endpoint smoke test, service/controller unit coverage across jobs, authentication, applications, profiles, resumes, interviews and notifications, plus MockMvc integration tests for authentication/security, recruiter job API access boundaries, application lifecycle/ownership, and student profile/job-matching endpoints. Playwright browser tests cover core student/recruiter authentication and guest route protection; deeper job-to-application-to-interview browser workflows and deployed production verification remain outstanding.
 - Interview scheduling, rescheduling and completion/cancellation are implemented; students receive an in-app notification when interview details change.
 - Notifications are in-app only. Email/SMS delivery, push notifications and scheduled reminders are not implemented.
 - Resume upload validates file size, extension and basic PDF/DOC/DOCX signatures/container structure; downloads are scoped to the owning student and recruiter-owned applicant records. Production hardening should add comprehensive MIME inspection, malware scanning, object storage, retention/deletion controls, and backups.
@@ -142,8 +144,8 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 
 ## Remaining work before production
 
-- Automated browser end-to-end coverage for complete student, recruiter and admin journeys.
-- The planned notification and admin reporting API integration tests have been added; validate them in the latest CI run.
+- Expand Playwright coverage to complete job-to-application-to-interview student/recruiter journeys and a seeded Admin browser journey.
+- Notification and admin reporting API integration tests are included in backend Maven verification.
 - Email verification, password reset and account recovery.
 - Hardened JWT storage/lifecycle with refresh and revocation controls.
 - Comprehensive resume MIME inspection, malware scanning, retention/deletion controls and production object storage.
