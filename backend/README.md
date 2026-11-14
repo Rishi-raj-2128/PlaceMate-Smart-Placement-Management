@@ -173,6 +173,18 @@ Notifications are generated for new applications (to the recruiter), application
 - GET `/api/admin/applications`
 - GET `/api/admin/reports/placements` — distinct hired students grouped by department.
 
+## Remaining work
+
+The following are not represented as completed features and should be addressed before production use:
+
+- Add automated browser end-to-end tests for complete student, recruiter and admin journeys.
+- Add broader API integration coverage for profile updates/job matching, resume upload/download, interview scheduling, notifications and admin reporting.
+- Add email verification, password reset and account recovery.
+- Replace local-storage JWT handling with a hardened token lifecycle/storage strategy and add refresh/revocation controls.
+- Add comprehensive upload MIME inspection, malware scanning, retention/deletion policies and production object storage.
+- Add audit logs, broader API rate limiting, monitoring/alerting, database backup/restore drills and deployment HTTPS verification.
+- Complete a production security review and verify migrations/operations against a deployed environment.
+
 ## Configuration and deployment
 
 - `application.yml` supports environment-based database, JWT, CORS, upload directory, server port and multipart size configuration.
