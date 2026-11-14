@@ -26,7 +26,7 @@ export function RecruiterJobsPage() {
     {loading ? <div className="panel empty-state">Loading your job postings...</div> :
       jobs.length === 0 ? <div className="panel empty-state"><BriefcaseBusiness size={28}/><h3>No job postings yet</h3><p>Create your first opportunity. Students can see it after admin approval.</p><Link to="/post-job" className="btn btn-primary">Create a job <ArrowRight size={15}/></Link></div> :
       <div className="panel table-panel"><div className="table-scroll"><table><thead><tr><th>POSITION</th><th>LOCATION</th><th>TYPE</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody>
-        {jobs.map(job => <tr key={job.id}><td><strong>{job.title}</strong><br/><small>{job.companyName}</small></td><td>{job.location}</td><td>{job.employmentType}</td><td><span className={'status-badge '+(job.status==='APPROVED'?'green':job.status==='REJECTED'?'red':'blue')}>{job.status}</span></td><td><Link className="text-link" to="/post-job" state={{job}}>Edit</Link> <button className="text-link" onClick={() => remove(job.id)}>Delete</button></td></tr>)}
+        {jobs.map(job => <tr key={job.id}><td><strong>{job.title}</strong><br/><small>{job.companyName}</small></td><td>{job.location}</td><td>{job.employmentType}</td><td><span className={'status-badge '+(job.status==='APPROVED'?'green':job.status==='REJECTED'?'red':'blue')}>{job.status}</span></td><td><Link className="text-link" to={"/applicants?jobId="+job.id}>Applicants</Link> <Link className="text-link" to="/post-job" state={{job}}>Edit</Link> <button className="text-link" onClick={() => remove(job.id)}>Delete</button></td></tr>)}
       </tbody></table></div></div>}
   </>
 }
