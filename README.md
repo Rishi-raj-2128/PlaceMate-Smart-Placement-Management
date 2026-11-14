@@ -136,7 +136,7 @@ Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded 
 - Notifications are in-app only. Email/SMS delivery, push notifications and scheduled reminders are not implemented.
 - Resume upload validates file size, extension and basic PDF/DOC/DOCX signatures/container structure; downloads are scoped to the owning student and recruiter-owned applicant records. Production hardening should add comprehensive MIME inspection, malware scanning, object storage, retention/deletion controls, and backups.
 - Dashboard metrics use live API data, but the landing-page mock preview and sample illustration content remain static.
-- Email verification, password reset, audit logs, rate limiting, production HTTPS/reverse-proxy hardening and a full automated security review remain outstanding.
+- Email verification, password reset, audit logs, broader API rate limiting, production HTTPS/reverse-proxy hardening and a full automated security review remain outstanding. Nginx currently applies an edge rate limit to login and registration only.
 - JWT is stored in browser local storage in this MVP. Revisit token storage and refresh/revocation strategy before production.
 
 ## Security configuration
