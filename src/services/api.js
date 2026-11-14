@@ -53,6 +53,7 @@ export const interviewApi = {
   student: () => api.get('/student/interviews'),
   recruiter: () => api.get('/recruiter/interviews'),
   schedule: (applicationId, payload) => api.post(`/recruiter/applications/${applicationId}/interviews`, payload),
+  reschedule: (id, payload) => api.put(`/recruiter/interviews/${id}`, payload),
   updateStatus: (id, status) => api.patch(`/recruiter/interviews/${id}/status`, null, { params: { status } }),
 }
 
