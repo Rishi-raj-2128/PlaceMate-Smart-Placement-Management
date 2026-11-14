@@ -41,7 +41,7 @@ public class StudentProfileService {
     @Transactional(readOnly = true)
     public List<JobMatchResponse> matches(String email) {
         User student = requireStudent(email);
-        StudentProfile profile = profiles.findByUserId(student.getId()).orElse(null);
+        StudentProfile profile = profiles.findByUser_Id(student.getId()).orElse(null);
         return jobs.findByStatusOrderByCreatedAtDesc(JobStatus.APPROVED).stream()
             .filter(job -> job.getDeadline() == null || !job.getDeadline().isBefore(LocalDate.now()))
             .map(job -> calculate(job, profile))
@@ -86,7 +86,7 @@ public class StudentProfileService {
     }
 
     private StudentProfile getOrCreate(User student) {
-        return profiles.findByUserId(student.getId()).orElseGet(() -> profiles.save(new StudentProfile(student)));
+        return profiles.findByUser_Id(student.getId()).orElseGet(() -> profiles.save(new StudentProfile(student)));
     }
 
     private User requireStudent(String email) {
