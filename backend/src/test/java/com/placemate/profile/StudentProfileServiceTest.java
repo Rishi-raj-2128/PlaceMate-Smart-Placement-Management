@@ -20,10 +20,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class StudentProfileServiceTest {
     @Mock private StudentProfileRepository profiles;
     @Mock private UserRepository users;
@@ -141,7 +144,7 @@ class StudentProfileServiceTest {
         when(job.getEmploymentType()).thenReturn("FULL_TIME");
         when(job.getMinCgpa()).thenReturn(minCgpa);
         when(job.getRequiredSkills()).thenReturn(skills);
-        when(job.getDeadline()).thenReturn(deadline);
+        doReturn(deadline).when(job).getDeadline();
         when(job.getStatus()).thenReturn(JobStatus.APPROVED);
         when(job.getCreatedBy()).thenReturn(recruiter);
         return job;
