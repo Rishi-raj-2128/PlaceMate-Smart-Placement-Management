@@ -30,6 +30,21 @@ public class InterviewService {
             "/interviews");
         return InterviewResponse.from(interview);
     }
+    @Transactional
+    public InterviewResponse reschedule(String email,Long id,InterviewRequest request){
+        User recruiter=require(email,Role.RECRUITER);
+        Interview interview=interviews.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Interview not found."));
+        if(!interview.getCreatedBy().getId().equals(recruiter.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,"You can only reschedule interviews you created.");
+        if(interview.getStatus()!=InterviewStatus.SCHEDULED)
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Only scheduled interviews can be rescheduled.");
+        interview.updateFrom(request);
+        Interview saved=interviews.save(interview);
+        notifications.create(interview.getApplication().getStudent(),"INTERVIEW_RESCHEDULED","Interview rescheduled",
+            "Your interview for "+interview.getApplication().getJob().getTitle()+" has a new date or meeting detail. Please review the updated schedule.","/interviews");
+        return InterviewResponse.from(saved);
+    }
+
     @Transactional(readOnly=true)
     public List<InterviewResponse> mine(String email){User u=require(email,Role.STUDENT);return interviews.findByApplication_Student_IdOrderByScheduledAtAsc(u.getId()).stream().map(InterviewResponse::from).toList();}
     @Transactional(readOnly=true)
