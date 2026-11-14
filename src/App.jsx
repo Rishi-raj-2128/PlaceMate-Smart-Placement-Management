@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, Bell, BriefcaseBusiness, Building2, Check,
@@ -10,6 +10,7 @@ import {
   CircleX, Send, ExternalLink, Zap, Award, BookOpen, MessageSquare
 } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from 'recharts'
+import { authApi } from './services/api.js'
 
 const jobs = [
   { id: 1, company: 'Microsoft', role: 'Software Engineer', place: 'Bengaluru · Hybrid', salary: '₹18–24 LPA', cgpa: '7.5+', skills: ['Java', 'DSA', 'OOP'], days: '3 days left', color: '#2563eb', logo: 'M', match: 96, type: 'Full-time' },
@@ -46,10 +47,10 @@ function Landing() {
 const studentMenu=[['Overview',LayoutDashboard,'/dashboard'],['My profile',UserRound,'/profile'],['Find jobs',BriefcaseBusiness,'/jobs'],['Recommended',Sparkles,'/recommended'],['My applications',FileText,'/applications'],['Interviews',CalendarDays,'/interviews']]
 const recruiterMenu=[['Overview',LayoutDashboard,'/dashboard'],['Company profile',Building2,'/profile'],['Post a job',Plus,'/post-job'],['Manage jobs',BriefcaseBusiness,'/jobs'],['Applicants',Users,'/applicants'],['Interviews',CalendarDays,'/interviews']]
 const adminMenu=[['Overview',LayoutDashboard,'/dashboard'],['Students',GraduationCap,'/students'],['Recruiters',Users,'/recruiters'],['Companies',Building2,'/companies'],['Job approvals',ShieldCheck,'/approvals'],['Applications',FileText,'/applications'],['Analytics',ChartNoAxesCombined,'/analytics'],['Reports',FileText,'/reports']]
-function DashboardLayout({children,role,setRole}) {
+function DashboardLayout({children,role,onLogout}) {
  const [open,setOpen]=useState(false), [notice,setNotice]=useState(false)
  const menu=role==='Recruiter'?recruiterMenu:role==='Admin'?adminMenu:studentMenu
- return <div className="app-shell"><aside className={open?'sidebar sidebar-open':'sidebar'}><div className="side-brand"><Brand light/><button className="side-close" onClick={()=>setOpen(false)}><X size={18}/></button></div><div className="workspace-label">WORKSPACE</div><nav className="side-nav">{menu.map(([label,Icon,path])=><NavLink key={label} to={path} onClick={()=>setOpen(false)} className={({isActive})=>isActive?'side-link active':'side-link'}><Icon size={18}/><span>{label}</span>{label==='Find jobs'&&<i className="side-count">8</i>}</NavLink>)}</nav><div className="side-bottom"><div className="help-card"><div className="help-icon"><CircleHelp size={17}/></div><strong>Need a hand?</strong><p>Our team is here to help you.</p><button onClick={()=>alert('Support centre coming soon.')}>Visit help centre <ArrowUpRight size={13}/></button></div><button className="side-link" onClick={()=>{setRole('Student');window.location.href='/login'}}><LogOut size={18}/><span>Sign out</span></button><div className="side-user"><div className="user-avatar">R</div><div><strong>Rishi Raj</strong><small>{role} account</small></div><MoreHorizontal size={18}/></div></div></aside>{open&&<div className="sidebar-overlay" onClick={()=>setOpen(false)}/>}<div className="main-shell"><header className="app-topbar"><button className="mobile-toggle app-menu" onClick={()=>setOpen(true)}><Menu/></button><div className="breadcrumb">Workspace <span>/</span> <b>{role} overview</b></div><div className="top-actions"><label className="role-switch"><span>View as</span><select value={role} onChange={e=>setRole(e.target.value)}><option>Student</option><option>Recruiter</option><option>Admin</option></select><ChevronDown size={13}/></label><button className="icon-button notification-button" onClick={()=>setNotice(!notice)}><Bell size={18}/><i/></button>{notice&&<div className="notification-pop"><b>Notifications</b><p>Your profile is looking great. Add 2 skills to reach 90%.</p><p>New roles matching your profile are available.</p></div>}<div className="top-user"><span className="user-avatar">R</span><div><b>Rishi Raj</b><small>{role}</small></div><ChevronDown size={14}/></div></div></header><main className="dashboard-content"><AnimatePresence mode="wait"><motion.div key={useLocation().pathname+role} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-6}} transition={{duration:.2}}>{children}</motion.div></AnimatePresence></main></div></div>
+ return <div className="app-shell"><aside className={open?'sidebar sidebar-open':'sidebar'}><div className="side-brand"><Brand light/><button className="side-close" onClick={()=>setOpen(false)}><X size={18}/></button></div><div className="workspace-label">WORKSPACE</div><nav className="side-nav">{menu.map(([label,Icon,path])=><NavLink key={label} to={path} onClick={()=>setOpen(false)} className={({isActive})=>isActive?'side-link active':'side-link'}><Icon size={18}/><span>{label}</span>{label==='Find jobs'&&<i className="side-count">8</i>}</NavLink>)}</nav><div className="side-bottom"><div className="help-card"><div className="help-icon"><CircleHelp size={17}/></div><strong>Need a hand?</strong><p>Our team is here to help you.</p><button onClick={()=>alert('Support centre coming soon.')}>Visit help centre <ArrowUpRight size={13}/></button></div><button className="side-link" onClick={onLogout}><LogOut size={18}/><span>Sign out</span></button><div className="side-user"><div className="user-avatar">R</div><div><strong>Rishi Raj</strong><small>{role} account</small></div><MoreHorizontal size={18}/></div></div></aside>{open&&<div className="sidebar-overlay" onClick={()=>setOpen(false)}/>}<div className="main-shell"><header className="app-topbar"><button className="mobile-toggle app-menu" onClick={()=>setOpen(true)}><Menu/></button><div className="breadcrumb">Workspace <span>/</span> <b>{role} overview</b></div><div className="top-actions"><span className="role-switch"><span>Workspace</span><b>{role}</b></span><button className="icon-button notification-button" onClick={()=>setNotice(!notice)}><Bell size={18}/><i/></button>{notice&&<div className="notification-pop"><b>Notifications</b><p>Your profile is looking great. Add 2 skills to reach 90%.</p><p>New roles matching your profile are available.</p></div>}<div className="top-user"><span className="user-avatar">R</span><div><b>Rishi Raj</b><small>{role}</small></div><ChevronDown size={14}/></div></div></header><main className="dashboard-content"><AnimatePresence mode="wait"><motion.div key={useLocation().pathname+role} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-6}} transition={{duration:.2}}>{children}</motion.div></AnimatePresence></main></div></div>
 }
 
 function PageHeading({eyebrow,title,description,action}) { return <div className="page-heading"><div><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></div>{action}</div> }
@@ -70,16 +71,112 @@ function JobsPage({title='Find your next opportunity'}) {
 function Applications(){return <><PageHeading eyebrow="YOUR JOURNEY" title="My applications" description="Every opportunity, every update, all in one place."/><div className="panel table-panel"><div className="panel-heading"><div><h3>Application tracker</h3><p>Follow your progress from application to outcome</p></div><span className="status-badge blue">12 total applications</span></div><div className="table-scroll"><table><thead><tr><th>COMPANY</th><th>POSITION</th><th>APPLIED</th><th>STATUS</th><th>NEXT STEP</th></tr></thead><tbody>{demoApplications.map((a,i)=><tr key={a.company}><td><div className="company-cell"><b className={`company-logo logo-${i}`}>{a.company[0]}</b><strong>{a.company}</strong></div></td><td>{a.role}</td><td>{a.date}</td><td><span className={`status-badge ${a.tone}`}>{a.status}</span></td><td><button className="text-link">View details <ArrowRight size={14}/></button></td></tr>)}</tbody></table></div></div><div className="panel timeline-panel"><h3>Application journey</h3><div className="timeline"><span className="timeline-done">Applied</span><i/><span className="timeline-done">Under review</span><i/><span className="timeline-current">Shortlisted</span><i/><span>Interview</span><i/><span>Outcome</span></div></div></>}
 function Profile(){return <><PageHeading eyebrow="YOUR IDENTITY" title="My profile" description="Make it easy for recruiters to see what makes you a great fit." action={<Button onClick={()=>alert('Profile editor will connect to the backend API.')}><FileText size={16}/> Edit profile</Button>}/><div className="profile-page-grid"><section className="panel profile-hero-card"><div className="profile-cover"/><div className="profile-person"><div className="profile-avatar">R</div><div><h2>Rishi Raj</h2><p>B.Tech · Computer Science & Engineering</p><span><MapPin size={14}/> Mohali, Punjab</span></div><span className="status-badge green">Open to opportunities</span></div><div className="profile-details"><div><small>EMAIL</small><b>rishi@example.com</b></div><div><small>GRADUATION YEAR</small><b>2028</b></div><div><small>CGPA</small><b>8.4 / 10</b></div></div></section><section className="panel"><div className="panel-heading"><div><h3>Skills & strengths</h3><p>Skills you've added to your profile</p></div><button className="icon-button"><Plus size={17}/></button></div><div className="job-tags profile-skills">{['Java','React','JavaScript','SQL','Data Structures','Python','Problem Solving'].map(s=><span key={s}>{s}</span>)}</div></section></div></>}
 function GenericPage({title,description,icon:Icon=FileText}){return <><PageHeading eyebrow="WORKSPACE" title={title} description={description}/><div className="panel empty-state"><div className="empty-icon"><Icon size={28}/></div><h3>{title} workspace</h3><p>This section is ready for integration with the PlaceMate Spring Boot APIs. Connect your backend to load live records here.</p><Button onClick={()=>alert('Backend integration is not connected yet.')}>Configure workspace <ArrowRight size={15}/></Button></div></>}
-function Login({register=false}) {
- const [role,setRole]=useState('Student'),[show,setShow]=useState(false),[name,setName]=useState(''),[email,setEmail]=useState(''),[password,setPassword]=useState('')
+function Login({register=false,onAuthenticated}) {
+ const [role,setRole]=useState('Student')
+ const [show,setShow]=useState(false)
+ const [fullName,setFullName]=useState('')
+ const [email,setEmail]=useState('')
+ const [password,setPassword]=useState('')
+ const [confirmPassword,setConfirmPassword]=useState('')
+ const [enrollmentNumber,setEnrollmentNumber]=useState('')
+ const [department,setDepartment]=useState('')
+ const [companyName,setCompanyName]=useState('')
+ const [companyWebsite,setCompanyWebsite]=useState('')
+ const [loading,setLoading]=useState(false)
+ const [error,setError]=useState('')
  const nav=useNavigate()
- const submit=e=>{e.preventDefault();if(!email||!password||(register&&!name)){alert('Please complete all required fields.');return}nav('/dashboard')}
- return <div className="auth-page"><div className="auth-brand"><Brand/><Link to="/">Back to home <ArrowRight size={15}/></Link></div><div className="auth-layout"><div className="auth-art"><div className="auth-art-content"><span className="eyebrow light-eyebrow">YOUR FUTURE, IN FOCUS</span><h1>Make your next move a <span>great one.</span></h1><p>Opportunities don't wait. Bring your career journey into focus with PlaceMate.</p><div className="auth-art-note"><Sparkles size={18}/><span>One connected space for every career milestone.</span></div></div><div className="auth-art-orb"/></div><div className="auth-form-side"><form className="auth-form" onSubmit={submit}><div className="auth-mobile-brand"><Brand/></div><span className="eyebrow">{register?'CREATE YOUR ACCOUNT':'WELCOME BACK'}</span><h2>{register?'Start your journey':'Good to see you again.'}</h2><p>{register?'Choose your role and create your PlaceMate account.':'Enter your details to continue to your workspace.'}</p>{register&&<><div className="role-picker"><button type="button" className={role==='Student'?'chosen':''} onClick={()=>setRole('Student')}><GraduationCap size={17}/> Student</button><button type="button" className={role==='Recruiter'?'chosen':''} onClick={()=>setRole('Recruiter')}><Building2 size={17}/> Recruiter</button></div><label className="form-label">{role==='Student'?'Full name':'Recruiter name'}<input value={name} onChange={e=>setName(e.target.value)} placeholder="Your full name" required/></label></>}<label className="form-label">Email address<div className="input-icon"><Mail size={17}/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" required/></div></label><label className="form-label">Password<div className="input-icon"><LockKeyhole size={17}/><input type={show?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password" required/><button type="button" onClick={()=>setShow(!show)}>{show?<EyeOff size={17}/>:<Eye size={17}/>}</button></div></label>{register&&<label className="form-label">Confirm password<input type="password" placeholder="Re-enter your password" required/></label>}{!register&&<div className="form-options"><label><input type="checkbox"/> Remember me</label><button type="button" onClick={()=>alert('Password reset will be available when backend email service is connected.')}>Forgot password?</button></div>}<button className="btn btn-primary auth-submit" type="submit">{register?'Create account':'Log in'} <ArrowRight size={16}/></button><div className="auth-switch">{register?'Already have an account?':'New to PlaceMate?'} <Link to={register?'/login':'/register'}>{register?'Log in':'Create an account'}</Link></div><div className="auth-disclaimer"><ShieldCheck size={15}/> Secure access · Role-based workspaces</div>{register&&<small className="auth-note">Admin accounts are provisioned by the placement team and cannot be created here.</small>}</form></div></div></div>
+
+ const submit=async(e)=>{
+  e.preventDefault()
+  setError('')
+  if(register&&password!==confirmPassword){setError('Passwords do not match.');return}
+  if(register&&role==='Student'&&(!enrollmentNumber.trim()||!department.trim())){setError('Please enter your enrollment number and department.');return}
+  if(register&&role==='Recruiter'&&!companyName.trim()){setError('Please enter your company name.');return}
+  setLoading(true)
+  try {
+   const response=register
+    ? await authApi.register({
+       fullName:fullName.trim(),email:email.trim(),password,role:role.toUpperCase(),
+       ...(role==='Student'?{enrollmentNumber:enrollmentNumber.trim(),department:department.trim()}:{companyName:companyName.trim(),companyWebsite:companyWebsite.trim()||null})
+      })
+    : await authApi.login({email:email.trim(),password})
+   onAuthenticated(response.data)
+   nav('/dashboard',{replace:true})
+  } catch(err) {
+   setError(err.response?.data?.message || (err.request?'Cannot reach PlaceMate server. Start the Spring Boot backend and try again.':'Something went wrong. Please try again.'))
+  } finally {setLoading(false)}
+ }
+
+ return <div className="auth-page"><div className="auth-brand"><Brand/><Link to="/">Back to home <ArrowRight size={15}/></Link></div><div className="auth-layout"><div className="auth-art"><div className="auth-art-content"><span className="eyebrow light-eyebrow">YOUR FUTURE, IN FOCUS</span><h1>Make your next move a <span>great one.</span></h1><p>Opportunities don't wait. Bring your career journey into focus with PlaceMate.</p><div className="auth-art-note"><Sparkles size={18}/><span>One connected space for every career milestone.</span></div></div><div className="auth-art-orb"/></div><div className="auth-form-side"><form className="auth-form" onSubmit={submit}><div className="auth-mobile-brand"><Brand/></div><span className="eyebrow">{register?'CREATE YOUR ACCOUNT':'WELCOME BACK'}</span><h2>{register?'Start your journey':'Good to see you again.'}</h2><p>{register?'Choose your role and create your PlaceMate account.':'Enter your details to continue to your workspace.'}</p>
+ {register&&<><div className="role-picker"><button type="button" className={role==='Student'?'chosen':''} onClick={()=>setRole('Student')}><GraduationCap size={17}/> Student</button><button type="button" className={role==='Recruiter'?'chosen':''} onClick={()=>setRole('Recruiter')}><Building2 size={17}/> Recruiter</button></div><label className="form-label">{role==='Student'?'Full name':'Recruiter name'}<input value={fullName} onChange={e=>setFullName(e.target.value)} placeholder="Your full name" maxLength={120} required/></label></>}
+ <label className="form-label">Email address<div className="input-icon"><Mail size={17}/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" required/></div></label>
+ <label className="form-label">Password<div className="input-icon"><LockKeyhole size={17}/><input type={show?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} placeholder="At least 8 characters" minLength={8} autoComplete={register?'new-password':'current-password'} required/><button type="button" onClick={()=>setShow(!show)} aria-label={show?'Hide password':'Show password'}>{show?<EyeOff size={17}/>:<Eye size={17}/>}</button></div></label>
+ {register&&<><label className="form-label">Confirm password<input type="password" value={confirmPassword} onChange={e=>setConfirmPassword(e.target.value)} placeholder="Re-enter your password" minLength={8} autoComplete="new-password" required/></label>
+ {role==='Student'?<><label className="form-label">Enrollment number<input value={enrollmentNumber} onChange={e=>setEnrollmentNumber(e.target.value)} placeholder="Your college enrollment number" required/></label><label className="form-label">Department<input value={department} onChange={e=>setDepartment(e.target.value)} placeholder="e.g. Computer Science" required/></label></>:<><label className="form-label">Company name<input value={companyName} onChange={e=>setCompanyName(e.target.value)} placeholder="Your company" required/></label><label className="form-label">Company website <span className="optional-label">Optional</span><input type="url" value={companyWebsite} onChange={e=>setCompanyWebsite(e.target.value)} placeholder="https://example.com"/></label></>}</>}
+ {!register&&<div className="form-options"><label><input type="checkbox"/> Remember me</label><button type="button" onClick={()=>setError('Password reset will be available after email delivery is configured.')}>Forgot password?</button></div>}
+ {error&&<div className="auth-error" role="alert">{error}</div>}
+ <button className="btn btn-primary auth-submit" type="submit" disabled={loading}>{loading?'Please wait...':register?'Create account':'Log in'} {!loading&&<ArrowRight size={16}/>}</button>
+ <div className="auth-switch">{register?'Already have an account?':'New to PlaceMate?'} <Link to={register?'/login':'/register'}>{register?'Log in':'Create an account'}</Link></div><div className="auth-disclaimer"><ShieldCheck size={15}/> Secure access · Role-based workspaces</div>{register&&<small className="auth-note">Admin accounts are provisioned by the placement team and cannot be created here.</small>}</form></div></div></div>
 }
 
 export default function App(){
- const [role,setRole]=useState('Student')
  const location=useLocation()
- const isPublic=['/','/login','/register'].includes(location.pathname)
- return <Routes><Route path="/" element={<Landing/>}/><Route path="/login" element={<Login/>}/><Route path="/register" element={<Login register/>}/><Route path="*" element={<DashboardLayout role={role} setRole={setRole}><Routes><Route path="/dashboard" element={<Dashboard role={role}/>}/><Route path="/jobs" element={<JobsPage/>}/><Route path="/recommended" element={<JobsPage title="Recommended for you"/>}/><Route path="/applications" element={<Applications/>}/><Route path="/profile" element={<Profile/>}/><Route path="/post-job" element={<GenericPage title="Post a job" description="Create a new opportunity and reach eligible candidates." icon={Plus}/>}/><Route path="/applicants" element={<GenericPage title="Applicants" description="Review candidates and manage your hiring pipeline." icon={Users}/>}/><Route path="/interviews" element={<GenericPage title="Interviews" description="Keep every interview schedule and update organized." icon={CalendarDays}/>}/><Route path="/students" element={<GenericPage title="Students" description="Manage student profiles and placement readiness." icon={GraduationCap}/>}/><Route path="/recruiters" element={<GenericPage title="Recruiters" description="Manage recruiter access and activity." icon={Users}/>}/><Route path="/companies" element={<GenericPage title="Companies" description="Manage organizations participating in campus placements." icon={Building2}/>}/><Route path="/approvals" element={<GenericPage title="Job approvals" description="Review and approve opportunities before they go live." icon={ShieldCheck}/>}/><Route path="/analytics" element={<GenericPage title="Placement analytics" description="Explore placement performance across departments and drives." icon={ChartNoAxesCombined}/>}/><Route path="/reports" element={<GenericPage title="Reports" description="Create and review placement reports." icon={FileText}/>}/><Route path="*" element={<Dashboard role={role}/>}/></Routes></DashboardLayout>}/></Routes>
+ const [auth,setAuth]=useState(()=>({
+  token:localStorage.getItem('placemate_token'),
+  user:JSON.parse(localStorage.getItem('placemate_user')||'null')
+ }))
+ const [checking,setChecking]=useState(()=>Boolean(localStorage.getItem('placemate_token')))
+ const role=auth.user?.role==='RECRUITER'?'Recruiter':auth.user?.role==='ADMIN'?'Admin':'Student'
+
+ useEffect(()=>{
+  if(!auth.token){setChecking(false);return}
+  let active=true
+  authApi.me().then(response=>{
+   if(!active)return
+   localStorage.setItem('placemate_user',JSON.stringify(response.data))
+   setAuth(current=>({...current,user:response.data}))
+  }).catch(()=>{
+   if(!active)return
+   localStorage.removeItem('placemate_token')
+   localStorage.removeItem('placemate_user')
+   setAuth({token:null,user:null})
+  }).finally(()=>{if(active)setChecking(false)})
+  return ()=>{active=false}
+ },[])
+
+ const handleAuthenticated=(data)=>{
+  localStorage.setItem('placemate_token',data.token)
+  localStorage.setItem('placemate_user',JSON.stringify(data.user))
+  setAuth({token:data.token,user:data.user})
+ }
+ const logout=()=>{
+  localStorage.removeItem('placemate_token')
+  localStorage.removeItem('placemate_user')
+  setAuth({token:null,user:null})
+  window.location.assign('/login')
+ }
+
+ if(checking)return <div className="auth-loading">Checking your PlaceMate session...</div>
+ return <Routes>
+  <Route path="/" element={<Landing/>}/>
+  <Route path="/login" element={auth.token?<Navigate to="/dashboard" replace/>:<Login onAuthenticated={handleAuthenticated}/>}/>
+  <Route path="/register" element={auth.token?<Navigate to="/dashboard" replace/>:<Login register onAuthenticated={handleAuthenticated}/>}/>
+  <Route path="*" element={auth.token?<DashboardLayout role={role} onLogout={logout}><Routes>
+   <Route path="/dashboard" element={<Dashboard role={role}/>}/>
+   <Route path="/jobs" element={<JobsPage/>}/>
+   <Route path="/recommended" element={<JobsPage title="Recommended for you"/>}/>
+   <Route path="/applications" element={<Applications/>}/>
+   <Route path="/profile" element={<Profile/>}/>
+   <Route path="/post-job" element={<GenericPage title="Post a job" description="Create a new opportunity and reach eligible candidates." icon={Plus}/>}/>
+   <Route path="/applicants" element={<GenericPage title="Applicants" description="Review candidates and manage your hiring pipeline." icon={Users}/>}/>
+   <Route path="/interviews" element={<GenericPage title="Interviews" description="Keep every interview schedule and update organized." icon={CalendarDays}/>}/>
+   <Route path="/students" element={<GenericPage title="Students" description="Manage student profiles and placement readiness." icon={GraduationCap}/>}/>
+   <Route path="/recruiters" element={<GenericPage title="Recruiters" description="Manage recruiter access and activity." icon={Users}/>}/>
+   <Route path="/companies" element={<GenericPage title="Companies" description="Manage organizations participating in campus placements." icon={Building2}/>}/>
+   <Route path="/approvals" element={<GenericPage title="Job approvals" description="Review and approve opportunities before they go live." icon={ShieldCheck}/>}/>
+   <Route path="/analytics" element={<GenericPage title="Placement analytics" description="Explore placement performance across departments and drives." icon={ChartNoAxesCombined}/>}/>
+   <Route path="/reports" element={<GenericPage title="Reports" description="Create and review placement reports." icon={FileText}/>}/>
+   <Route path="*" element={<Navigate to="/dashboard" replace/>}/>
+  </Routes></DashboardLayout>:<Navigate to="/login" state={{from:location.pathname}} replace/>}/>
+ </Routes>
 }
