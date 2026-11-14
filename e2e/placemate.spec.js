@@ -47,7 +47,7 @@ test('recruiter can register and access recruiter-only workspace', async ({ page
   await expect(page).toHaveURL(/\/dashboard$/)
   await expect(page.getByRole('heading', { name: 'Recruiter workspace' })).toBeVisible()
   await expect(page.getByText('Recruiter account')).toBeVisible()
-  await page.getByRole('link', { name: 'Post a job' }).click()
+  await page.getByRole('navigation').getByRole('link', { name: 'Post a job' }).click()
   await expect(page.getByRole('heading', { name: /Post a new job/i })).toBeVisible()
 })
 
@@ -71,7 +71,7 @@ test('complete placement lifecycle: recruiter posting, admin approval, student a
   await page.getByLabel('Company name').fill('Lifecycle Test Company')
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page).toHaveURL(/\/dashboard$/)
-  await page.getByRole('link', { name: 'Post a job' }).click()
+  await page.getByRole('navigation').getByRole('link', { name: 'Post a job' }).click()
   await page.getByLabel('Job title').fill(jobTitle)
   await page.getByLabel('Company name').fill('Lifecycle Test Company')
   await page.getByLabel('Location').fill('Mohali · Hybrid')
