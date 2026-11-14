@@ -122,7 +122,7 @@ The frontend stores the returned access token in browser local storage and sends
 ## Important notes
 
 - Admin accounts must be provisioned by the placement team; there is no public Admin signup.
-- Job listings and application tracking now use backend APIs. Student academic profile and eligibility matching now use backend APIs. Resume file upload, interviews, notifications, admin analytics, and live dashboard metrics still need implementation; some dashboard data remains illustrative.
+- Job listings, application tracking, student academic profiles, and eligibility matching now use backend APIs. Resume file upload, interviews, notifications, admin analytics, and live dashboard metrics still need implementation; some dashboard data remains illustrative.
 - Compilation, database connectivity, and end-to-end flows (authentication, job management, and applications) have **not yet been verified on a local machine**. Run both apps locally and test before treating this as production-ready.
 - Before production: configure HTTPS, unique secrets, rate limiting, email verification, password recovery, audit logging, and secure token storage.
 
