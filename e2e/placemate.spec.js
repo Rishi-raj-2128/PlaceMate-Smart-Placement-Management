@@ -85,6 +85,13 @@ test('complete placement lifecycle: recruiter posting, admin approval, student a
   await expect(page.getByLabel('Location')).toHaveValue('Mohali · Hybrid')
   await expect(page.getByLabel(/Required skills/)).toHaveValue('Java, Spring Boot')
   await expect(page.getByLabel('Job description')).toHaveValue('Browser-tested placement lifecycle role.')
+  const formValidity = await page.locator('form').evaluate(form => ({
+    valid: form.checkValidity(),
+    invalidFields: [...form.elements].filter(field => !field.checkValidity()).map(field => ({
+      name: field.name, value: field.value, validationMessage: field.validationMessage,
+    })),
+  }))
+  expect(formValidity, JSON.stringify(formValidity)).toEqual({ valid: true, invalidFields: [] })
   await page.getByRole('button', { name: 'Submit for approval' }).click()
   await expect(page.getByRole('status')).toContainText('Job saved and submitted for admin approval.')
 
