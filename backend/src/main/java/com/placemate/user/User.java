@@ -22,6 +22,7 @@ public class User {
   this.fullName=fullName; this.email=email; this.password=password; this.role=role;
  }
  @PrePersist void onCreate(){ createdAt=Instant.now(); }
+ public void setPassword(String v){password=v;}
  public Long getId(){return id;} public String getFullName(){return fullName;}
  public String getEmail(){return email;} public String getPassword(){return password;}
  public Role getRole(){return role;} public String getEnrollmentNumber(){return enrollmentNumber;}
