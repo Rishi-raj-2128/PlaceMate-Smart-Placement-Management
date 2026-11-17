@@ -79,6 +79,12 @@ test('complete placement lifecycle: recruiter posting, admin approval, student a
   await page.getByLabel('Minimum CGPA').fill('6.0')
   await page.getByLabel(/Required skills/).fill('Java, Spring Boot')
   await page.getByLabel('Job description').fill('Browser-tested placement lifecycle role.')
+  // Assert controlled form values before submitting so regressions in React state handling are caught.
+  await expect(page.getByLabel('Job title')).toHaveValue(jobTitle)
+  await expect(page.getByLabel('Company name')).toHaveValue('Lifecycle Test Company')
+  await expect(page.getByLabel('Location')).toHaveValue('Mohali · Hybrid')
+  await expect(page.getByLabel(/Required skills/)).toHaveValue('Java, Spring Boot')
+  await expect(page.getByLabel('Job description')).toHaveValue('Browser-tested placement lifecycle role.')
   await page.getByRole('button', { name: 'Submit for approval' }).click()
   await expect(page.getByRole('status')).toContainText('Job saved and submitted for admin approval.')
 
