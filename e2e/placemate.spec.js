@@ -105,7 +105,20 @@ test('complete placement lifecycle: recruiter posting, admin approval, student a
     })),
   }))
   expect(formValidity, JSON.stringify(formValidity)).toEqual({ valid: true, invalidFields: [] })
+  const createJobResponsePromise = page.waitForResponse(response =>
+    response.request().method() === 'POST' &&
+    new URL(response.url()).pathname.endsWith('/api/recruiter/jobs'),
+    { timeout: 15000 }
+  )
   await page.getByRole('button', { name: 'Submit for approval' }).click()
+  let createJobResponse
+  try {
+    createJobResponse = await createJobResponsePromise
+  } catch (error) {
+    const visibleError = await page.locator('.auth-error').allTextContents()
+    throw new Error(`Job form did not reach POST /api/recruiter/jobs. Visible errors: ${visibleError.join(' | ') || 'none'}. ${error.message}`)
+  }
+  expect(createJobResponse.status(), await createJobResponse.text()).toBe(201)
   await expect(page.getByRole('status')).toContainText('Job saved and submitted for admin approval.')
 
   // Admin is provisioned only in the isolated CI E2E environment.
