@@ -42,13 +42,18 @@ public class LocalAdminInitializer implements CommandLineRunner {
             throw new IllegalStateException("Local admin credentials must be supplied; password must contain at least 8 characters.");
         }
 
-        users.findByEmailIgnoreCase(email.trim()).ifPresentOrElse(existing -> {
+        String normalizedEmail = email.trim().toLowerCase(java.util.Locale.ROOT);
+        users.findByEmailIgnoreCase(normalizedEmail).ifPresentOrElse(existing -> {
             if (existing.getRole() != Role.ADMIN) {
                 throw new IllegalStateException("The configured local admin email already belongs to a non-admin account.");
             }
+            // This is a local-only profile: synchronize the configured password
+            // so developers can recover access if the account already existed.
+            existing.setPassword(passwordEncoder.encode(password));
+            users.save(existing);
         }, () -> users.save(new User(
             "PlaceMate Administrator",
-            email.trim().toLowerCase(java.util.Locale.ROOT),
+            normalizedEmail,
             passwordEncoder.encode(password),
             Role.ADMIN
         )));
