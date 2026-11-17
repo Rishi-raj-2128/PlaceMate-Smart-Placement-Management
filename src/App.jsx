@@ -28,7 +28,7 @@ const demoApplications = [
   {company:'Adobe',role:'Frontend Intern',date:'08 Nov 2026',status:'Interview scheduled',tone:'purple'}
 ]
 
-function Brand({light=false}) { return <Link to="/" className={`brand ${light?'brand-light':''}`}><span className="brand-mark"><GraduationCap size={21}/></span><span>place<span className="brand-accent">mate</span></span></Link> }
+function Brand({light=false}) { return <Link to="/" className={`brand ${light?'brand-light':''}`}><span className="brand-mark"><GraduationCap size={21}/></span><span>Place<span className="brand-accent">Mate</span></span></Link> }
 function Button({children,variant='primary',to,onClick,className=''}) { const cls=`btn btn-${variant} ${className}`; return to ? <Link className={cls} to={to}>{children}</Link> : <button className={cls} onClick={onClick}>{children}</button> }
 
 function Landing() {
