@@ -123,6 +123,31 @@ function AdminDashboard() {
  </>
 }
 
+function AdminPortalPage({user,onLogout}) {
+ const nav=[
+  ['/admin',LayoutDashboard,'Overview'],
+  ['/students',GraduationCap,'Students'],
+  ['/recruiters',Users,'Recruiters'],
+  ['/companies',Building2,'Companies'],
+  ['/approvals',ShieldCheck,'Job approvals'],
+  ['/applications',FileText,'Applications'],
+  ['/analytics',ChartNoAxesCombined,'Analytics'],
+  ['/reports',ClipboardList,'Reports']
+ ]
+ return <div className="admin-portal-shell">
+  <aside className="admin-portal-sidebar">
+   <Link to="/admin" className="admin-portal-brand"><span className="admin-portal-brand-mark"><GraduationCap size={21}/></span><span>Place<span>Mate</span><small>ADMIN PORTAL</small></span></Link>
+   <div className="admin-portal-nav-label">WORKSPACE</div>
+   <nav>{nav.map(([to,Icon,label])=><Link key={to} to={to} className={window.location.pathname===to?'active':''}><Icon size={17}/><span>{label}</span>{to==='/approvals'&&<span className="admin-portal-nav-dot"/>}</Link>)}</nav>
+   <div className="admin-portal-sidebar-bottom"><div className="admin-portal-user"><span><ShieldCheck size={17}/></span><div><strong>{user?.fullName||'Administrator'}</strong><small>Platform administrator</small></div></div><button onClick={onLogout}><LogOut size={16}/> Sign out</button></div>
+  </aside>
+  <main className="admin-portal-main">
+   <header className="admin-portal-topbar"><div><span>PLACEMENT MANAGEMENT</span><strong>Administration</strong></div><div className="admin-portal-top-user"><span className="admin-portal-online"/>{user?.email||'Admin account'}</div></header>
+   <div className="admin-portal-content"><AdminDashboard/></div>
+  </main>
+ </div>
+}
+
 function Dashboard({role}) {
  if(role==='Admin')return <AdminDashboard/>
  const isStudent=role==='Student', isRecruiter=role==='Recruiter'
@@ -392,6 +417,8 @@ export default function App(){
   <Route path="/" element={<Landing/>}/>
   <Route path="/login" element={auth.token?<Navigate to="/dashboard" replace/>:<Login onAuthenticated={handleAuthenticated}/>}/>
   <Route path="/register" element={auth.token?<Navigate to="/dashboard" replace/>:<Login register onAuthenticated={handleAuthenticated}/>}/>
+  <Route path="/admin" element={auth.token?(role==='Admin'?<AdminPortalPage user={auth.user} onLogout={logout}/>:<Navigate to="/dashboard" replace/>):<Navigate to="/login" state={{from:'/admin'}} replace/>}/>
+
   <Route path="*" element={auth.token?<DashboardLayout role={role} onLogout={logout} user={auth.user}><Routes>
    <Route path="/dashboard" element={<Dashboard role={role}/>}/>
    <Route path="/jobs" element={role === "Recruiter" ? <RecruiterJobsPage/> : <JobsPage allowApply={role === "Student"}/>}/>
