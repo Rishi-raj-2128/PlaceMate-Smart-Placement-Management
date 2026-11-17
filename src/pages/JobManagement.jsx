@@ -44,7 +44,10 @@ export function PostJobPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const change = event => setForm(current => ({ ...current, [event.target.name]:event.target.value }))
+  const change = event => {
+    const { name, value } = event.target
+    setForm(current => ({ ...current, [name]:value }))
+  }
   const submit = async event => {
     event.preventDefault(); setSaving(true); setError(''); setSuccess('')
     const payload = {
