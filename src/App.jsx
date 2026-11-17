@@ -59,7 +59,72 @@ function DashboardLayout({children,role,onLogout,user}) {
 
 function PageHeading({eyebrow,title,description,action}) { return <div className="page-heading"><div><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></div>{action}</div> }
 function StatCard({label,value,change,Icon,color}) { return <motion.div className="stat-card" whileHover={{y:-3}}><div className="stat-top"><span>{label}</span><i className={`stat-icon ${color}`}><Icon size={19}/></i></div><div className="stat-value">{value}</div><div className="stat-foot"><span className="stat-change"><ArrowUpRight size={13}/>{change}</span><span>vs last month</span></div></motion.div> }
+function AdminDashboard() {
+ const [overview,setOverview]=useState(null)
+ const [applications,setApplications]=useState([])
+ const [placements,setPlacements]=useState([])
+ const [pendingJobs,setPendingJobs]=useState([])
+ const [loading,setLoading]=useState(true)
+ const [error,setError]=useState('')
+ const [refreshing,setRefreshing]=useState(false)
+ const load=async(initial=false)=>{
+  if(initial)setLoading(true);else setRefreshing(true)
+  setError('')
+  try{
+   const [summary,apps,departmentRows,pending]=await Promise.all([
+    adminApi.overview(),adminApi.applications(),adminApi.placements(),jobApi.pending()
+   ])
+   setOverview(summary.data)
+   setApplications(apps.data)
+   setPlacements(departmentRows.data)
+   setPendingJobs(pending.data)
+  }catch(e){setError(e.response?.data?.message||'Unable to load admin dashboard data. Check that you are signed in with an ADMIN account and the API is available.')}
+  finally{setLoading(false);setRefreshing(false)}
+ }
+ useEffect(()=>{load(true)},[])
+ const metrics=overview?[
+  ['Students',overview.students,GraduationCap,'blue','/students'],
+  ['Recruiters',overview.recruiters,Users,'purple','/recruiters'],
+  ['Companies',overview.companies,Building2,'green','/companies'],
+  ['Pending approvals',overview.jobsPending,ShieldCheck,'orange','/approvals'],
+  ['Approved jobs',overview.jobsApproved,BriefcaseBusiness,'blue','/approvals'],
+  ['Applications',overview.applications,FileText,'purple','/applications'],
+  ['Shortlisted',overview.shortlisted,Award,'green','/applications'],
+  ['Hired',overview.hired,CheckCircle2,'orange','/analytics']
+ ]:[]
+ const quickLinks=[
+  ['Review job approvals','Approve or reject recruiter job postings',ShieldCheck,'/approvals'],
+  ['Manage students','View registered student accounts',GraduationCap,'/students'],
+  ['Verify companies','Review recruiter company information',Building2,'/companies'],
+  ['Placement analytics','Explore department placement outcomes',ChartNoAxesCombined,'/analytics']
+ ]
+ const date=value=>value?new Date(value).toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'—'
+ const tone=status=>({APPLIED:'blue',UNDER_REVIEW:'purple',SHORTLISTED:'green',REJECTED:'red',HIRED:'green'}[status]||'blue')
+ return <>
+  <PageHeading eyebrow="ADMIN CONTROL CENTRE" title="Admin dashboard" description="Monitor placement activity, manage approvals, and oversee the PlaceMate ecosystem." action={<button className="btn btn-outline" onClick={()=>load(false)} disabled={refreshing}><RefreshCw size={15}/>{refreshing?'Refreshing...':'Refresh data'}</button>}/>
+  {error&&<div className="auth-error">{error}</div>}
+  {loading?<div className="panel empty-state">Loading live administration data...</div>:overview&&<>
+   <div className="admin-dashboard-welcome panel"><div><span className="eyebrow">PLATFORM SNAPSHOT</span><h2>Placement operations at a glance</h2><p>These figures are loaded live from your PlaceMate backend.</p></div><div className="admin-welcome-mark"><ShieldCheck size={26}/></div></div>
+   <div className="admin-metric-grid admin-dashboard-metrics">{metrics.map(([name,value,Icon,color,path])=><Link to={path} className="panel admin-metric admin-dashboard-metric" key={name}><div className="admin-metric-label"><span>{name}</span><i className={'stat-icon '+color}><Icon size={17}/></i></div><strong>{value??0}</strong><small>View details <ArrowUpRight size={12}/></small></Link>)}</div>
+   <div className="admin-quick-grid">{quickLinks.map(([title,description,Icon,path])=><Link to={path} className="panel admin-quick-card" key={title}><i><Icon size={19}/></i><div><strong>{title}</strong><p>{description}</p></div><ArrowRight size={16}/></Link>)}</div>
+   <div className="admin-dashboard-bottom">
+    <section className="panel table-panel admin-dashboard-activity"><div className="panel-heading"><div><h3>Recent applications</h3><p>Latest applications across all approved opportunities</p></div><Link to="/applications" className="text-link">All applications <ArrowRight size={14}/></Link></div>
+     {applications.length===0?<div className="empty-state"><FileText size={25}/><h3>No applications yet</h3><p>Student applications will appear here.</p></div>:<div className="table-scroll"><table><thead><tr><th>STUDENT</th><th>COMPANY / ROLE</th><th>DEPARTMENT</th><th>APPLIED</th><th>STATUS</th></tr></thead><tbody>{applications.slice(0,6).map(row=><tr key={row.id}><td><strong>{row.studentName}</strong><small className="admin-cell-sub">{row.studentEmail}</small></td><td>{row.companyName}<small className="admin-cell-sub">{row.jobTitle}</small></td><td>{row.department||'—'}</td><td>{date(row.appliedAt)}</td><td><span className={'status-badge '+tone(row.status)}>{String(row.status||'').replaceAll('_',' ')}</span></td></tr>)}</tbody></table></div>}
+    </section>
+    <section className="panel admin-pending-panel"><div className="panel-heading"><div><h3>Pending job approvals</h3><p>Jobs waiting for placement-team review</p></div><span className="admin-pending-count">{pendingJobs.length}</span></div>
+     {pendingJobs.length===0?<div className="admin-report-empty">No jobs are waiting for approval.</div>:<div className="admin-pending-list">{pendingJobs.slice(0,5).map(job=><div className="admin-pending-item" key={job.id}><span className="admin-pending-icon"><BriefcaseBusiness size={16}/></span><div><strong>{job.title}</strong><small>{job.companyName||job.company||'Company'} · {job.location||'Location not specified'}</small></div><Link to="/approvals" aria-label={'Review '+job.title}><ArrowUpRight size={15}/></Link></div>)}</div>}
+     <Link to="/approvals" className="btn btn-primary admin-pending-cta">Open approval queue <ArrowRight size={14}/></Link>
+    </section>
+   </div>
+   <section className="panel table-panel admin-report-panel"><div className="panel-heading"><div><h3>Placement outcomes by department</h3><p>Distinct students with hired applications</p></div><Link to="/analytics" className="text-link">View analytics <ArrowRight size={14}/></Link></div>
+    {placements.length===0?<p className="admin-report-empty">No hired placement outcomes have been recorded yet.</p>:<div className="table-scroll"><table><thead><tr><th>DEPARTMENT</th><th>HIRED STUDENTS</th></tr></thead><tbody>{placements.slice(0,6).map(row=><tr key={row.department}><td>{row.department}</td><td><strong>{row.hiredStudents}</strong></td></tr>)}</tbody></table></div>}
+   </section>
+  </>}
+ </>
+}
+
 function Dashboard({role}) {
+ if(role==='Admin')return <AdminDashboard/>
  const isStudent=role==='Student', isRecruiter=role==='Recruiter'
  const [stats,setStats]=useState([])
  const [recent,setRecent]=useState([])
