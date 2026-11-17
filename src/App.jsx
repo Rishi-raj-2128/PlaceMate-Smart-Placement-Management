@@ -7,7 +7,7 @@ import {
   LogOut, Menu, MoreHorizontal, Search, Settings, ShieldCheck, Sparkles, Target, Users,
   X, Bookmark, MapPin, IndianRupee, CalendarDays, TrendingUp, ChartNoAxesCombined,
   UserRound, Mail, LockKeyhole, Eye, EyeOff, Plus, SlidersHorizontal, CheckCircle2,
-  CircleX, Send, ExternalLink, Zap, Award, BookOpen, MessageSquare
+  CircleX, Send, ExternalLink, Zap, Award, BookOpen, MessageSquare, RefreshCw
 } from 'lucide-react'
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar } from 'recharts'
 import { authApi, jobApi, profileApi, resumeApi, notificationApi, adminApi, interviewApi } from './services/api.js'
@@ -28,7 +28,7 @@ const demoApplications = [
   {company:'Adobe',role:'Frontend Intern',date:'08 Nov 2026',status:'Interview scheduled',tone:'purple'}
 ]
 
-function Brand({light=false}) { return <Link to="/" className={`brand ${light?'brand-light':''}`}><span className="brand-mark"><GraduationCap size={21}/></span><span>place<span className="brand-accent">mate</span></span></Link> }
+function Brand({light=false}) { return <Link to="/" className={`brand ${light?'brand-light':''}`}><span className="brand-mark"><GraduationCap size={21}/></span><span>Place<span className="brand-accent">Mate</span></span></Link> }
 function Button({children,variant='primary',to,onClick,className=''}) { const cls=`btn btn-${variant} ${className}`; return to ? <Link className={cls} to={to}>{children}</Link> : <button className={cls} onClick={onClick}>{children}</button> }
 
 function Landing() {
@@ -38,7 +38,7 @@ function Landing() {
     <header className="site-header"><div className="container nav-wrap"><Brand/><nav className={mobileOpen?'nav-links open':'nav-links'}><a href="#about" onClick={()=>setMobileOpen(false)}>About</a><a href="#features" onClick={()=>setMobileOpen(false)}>Features</a><a href="#how" onClick={()=>setMobileOpen(false)}>How it works</a><a href="#contact" onClick={()=>setMobileOpen(false)}>Contact</a></nav><div className="nav-actions"><Link className="login-link" to="/login">Log in</Link><Button to="/register">Get started <ArrowRight size={16}/></Button></div><button className="mobile-toggle" onClick={()=>setMobileOpen(!mobileOpen)} aria-label="Toggle menu">{mobileOpen?<X/>:<Menu/>}</button></div></header>
     <main>
       <section className="hero-section"><div className="hero-glow glow-one"/><div className="hero-glow glow-two"/><div className="container hero-grid"><motion.div className="hero-copy" initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:.7}}><div className="eyebrow"><span className="eyebrow-dot"/> THE NEXT STEP STARTS HERE</div><h1>Your career journey <span>starts here.</span></h1><p className="hero-lead">Discover opportunities, connect with recruiters, and take the next step toward your dream career.</p><div className="hero-buttons"><Button to="/register">Explore opportunities <ArrowRight size={17}/></Button><Button variant="outline" to="/login">I already have an account</Button></div><div className="hero-proof"><div className="avatar-stack"><i>R</i><i>A</i><i>S</i><i>+</i></div><div><strong>Made for ambitious futures</strong><small>One platform. More possibilities.</small></div></div></motion.div>
-      <motion.div className="hero-visual" initial={{opacity:0,scale:.94}} animate={{opacity:1,scale:1}} transition={{duration:.8,delay:.15}}><div className="visual-orbit orbit-a"/><div className="visual-orbit orbit-b"/><div className="hero-window"><div className="window-top"><div className="window-dots"><i/><i/><i/></div><span>placemate.app / overview</span><MoreHorizontal size={18}/></div><div className="preview-content"><div className="preview-greeting"><div><small>MONDAY, NOVEMBER 12</small><h3>Your next chapter awaits.</h3></div><span className="preview-avatar">R</span></div><div className="preview-stats"><div><span>Matched roles</span><strong>24</strong><small className="positive">↑ 12% this week</small></div><div><span>Profile strength</span><strong>86%</strong><div className="mini-progress"><i/></div></div></div><div className="preview-label">TOP MATCHES FOR YOU <span>View all</span></div><div className="preview-job"><b className="mini-logo ms">M</b><div><strong>Software Engineer</strong><small>Microsoft · Bengaluru</small></div><em>96% match</em></div><div className="preview-job"><b className="mini-logo del">D</b><div><strong>Technology Analyst</strong><small>Deloitte · Hyderabad</small></div><em>91% match</em></div></div></div><div className="float-card float-match"><span className="float-icon"><Sparkles size={16}/></span><div><strong>Great match!</strong><small>Your skills align with 9 roles</small></div></div><div className="float-card float-alert"><span className="float-icon green"><Check size={16}/></span><div><strong>Application update</strong><small>You're shortlisted 🎉</small></div></div></motion.div></div><div className="container hero-bottom"><span>YOUR CAREER, CONNECTED</span><div><b>STUDENTS</b><b>RECRUITERS</b><b>PLACEMENT TEAMS</b></div></div></section>
+      <motion.div className="hero-visual" initial={{opacity:0,scale:.94}} animate={{opacity:1,scale:1}} transition={{duration:.8,delay:.15}}><div className="visual-orbit orbit-a"/><div className="visual-orbit orbit-b"/><div className="hero-window"><div className="window-top"><div className="window-dots"><i/><i/><i/></div><span>PlaceMate.app / overview</span><MoreHorizontal size={18}/></div><div className="preview-content"><div className="preview-greeting"><div><small>MONDAY, NOVEMBER 12</small><h3>Your next chapter awaits.</h3></div><span className="preview-avatar">R</span></div><div className="preview-stats"><div><span>Matched roles</span><strong>24</strong><small className="positive">↑ 12% this week</small></div><div><span>Profile strength</span><strong>86%</strong><div className="mini-progress"><i/></div></div></div><div className="preview-label">TOP MATCHES FOR YOU <span>View all</span></div><div className="preview-job"><b className="mini-logo ms">M</b><div><strong>Software Engineer</strong><small>Microsoft · Bengaluru</small></div><em>96% match</em></div><div className="preview-job"><b className="mini-logo del">D</b><div><strong>Technology Analyst</strong><small>Deloitte · Hyderabad</small></div><em>91% match</em></div></div></div><div className="float-card float-match"><span className="float-icon"><Sparkles size={16}/></span><div><strong>Great match!</strong><small>Your skills align with 9 roles</small></div></div><div className="float-card float-alert"><span className="float-icon green"><Check size={16}/></span><div><strong>Application update</strong><small>You're shortlisted 🎉</small></div></div></motion.div></div><div className="container hero-bottom"><span>YOUR CAREER, CONNECTED</span><div><b>STUDENTS</b><b>RECRUITERS</b><b>PLACEMENT TEAMS</b></div></div></section>
       <section className="stats-strip"><div className="container stats-row"><div><strong>3-in-1</strong><span>Connected ecosystem</span></div><div><strong>24/7</strong><span>Opportunity access</span></div><div><strong>1 place</strong><span>For your entire journey</span></div><div><strong>100%</strong><span>Career-focused</span></div></div></section>
       <section className="section-pad" id="features"><div className="container"><div className="section-heading"><span className="eyebrow">A SMARTER WAY FORWARD</span><h2>Everything you need to <span>move forward.</span></h2><p>Less chasing updates. More time building the future you want.</p></div><div className="feature-grid">{features.map(([title,desc,Icon],i)=><motion.article className="feature-card" key={title} whileHover={{y:-6}} transition={{duration:.2}}><div className="feature-icon">{<Icon size={22}/>}</div><span className="feature-number">0{i+1}</span><h3>{title}</h3><p>{desc}</p><a href="#how">Explore feature <ArrowUpRight size={15}/></a></motion.article>)}</div></div></section>
       <section className="how-section section-pad" id="how"><div className="container how-grid"><div><span className="eyebrow">SIMPLE BY DESIGN</span><h2>From first click to <span>first offer.</span></h2><p className="muted-copy">A transparent, organized process that keeps every stakeholder in sync.</p><Button to="/register">Get started today <ArrowRight size={16}/></Button></div><div className="steps"><div className="step"><b>01</b><div><h3>Build your profile</h3><p>Showcase your skills, education and aspirations.</p></div></div><div className="step"><b>02</b><div><h3>Find your fit</h3><p>Explore relevant roles with clear eligibility insights.</p></div></div><div className="step"><b>03</b><div><h3>Track your progress</h3><p>Stay on top of applications, interviews and outcomes.</p></div></div></div></div></section>
@@ -59,7 +59,97 @@ function DashboardLayout({children,role,onLogout,user}) {
 
 function PageHeading({eyebrow,title,description,action}) { return <div className="page-heading"><div><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></div>{action}</div> }
 function StatCard({label,value,change,Icon,color}) { return <motion.div className="stat-card" whileHover={{y:-3}}><div className="stat-top"><span>{label}</span><i className={`stat-icon ${color}`}><Icon size={19}/></i></div><div className="stat-value">{value}</div><div className="stat-foot"><span className="stat-change"><ArrowUpRight size={13}/>{change}</span><span>vs last month</span></div></motion.div> }
+function AdminDashboard() {
+ const [overview,setOverview]=useState(null)
+ const [applications,setApplications]=useState([])
+ const [placements,setPlacements]=useState([])
+ const [pendingJobs,setPendingJobs]=useState([])
+ const [loading,setLoading]=useState(true)
+ const [error,setError]=useState('')
+ const [refreshing,setRefreshing]=useState(false)
+ const load=async(initial=false)=>{
+  if(initial)setLoading(true);else setRefreshing(true)
+  setError('')
+  try{
+   const [summary,apps,departmentRows,pending]=await Promise.all([
+    adminApi.overview(),adminApi.applications(),adminApi.placements(),jobApi.pending()
+   ])
+   setOverview(summary.data)
+   setApplications(apps.data)
+   setPlacements(departmentRows.data)
+   setPendingJobs(pending.data)
+  }catch(e){setError(e.response?.data?.message||'Unable to load admin dashboard data. Check that you are signed in with an ADMIN account and the API is available.')}
+  finally{setLoading(false);setRefreshing(false)}
+ }
+ useEffect(()=>{load(true)},[])
+ const metrics=overview?[
+  ['Students',overview.students,GraduationCap,'blue','/students'],
+  ['Recruiters',overview.recruiters,Users,'purple','/recruiters'],
+  ['Companies',overview.companies,Building2,'green','/companies'],
+  ['Pending approvals',overview.jobsPending,ShieldCheck,'orange','/approvals'],
+  ['Approved jobs',overview.jobsApproved,BriefcaseBusiness,'blue','/approvals'],
+  ['Applications',overview.applications,FileText,'purple','/applications'],
+  ['Shortlisted',overview.shortlisted,Award,'green','/applications'],
+  ['Hired',overview.hired,CheckCircle2,'orange','/analytics']
+ ]:[]
+ const quickLinks=[
+  ['Review job approvals','Approve or reject recruiter job postings',ShieldCheck,'/approvals'],
+  ['Manage students','View registered student accounts',GraduationCap,'/students'],
+  ['Verify companies','Review recruiter company information',Building2,'/companies'],
+  ['Placement analytics','Explore department placement outcomes',ChartNoAxesCombined,'/analytics']
+ ]
+ const date=value=>value?new Date(value).toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}):'—'
+ const tone=status=>({APPLIED:'blue',UNDER_REVIEW:'purple',SHORTLISTED:'green',REJECTED:'red',HIRED:'green'}[status]||'blue')
+ return <>
+  <PageHeading eyebrow="ADMIN CONTROL CENTRE" title="Admin dashboard" description="Monitor placement activity, manage approvals, and oversee the PlaceMate ecosystem." action={<button className="btn btn-outline" onClick={()=>load(false)} disabled={refreshing}><RefreshCw size={15}/>{refreshing?'Refreshing...':'Refresh data'}</button>}/>
+  {error&&<div className="auth-error">{error}</div>}
+  {loading?<div className="panel empty-state">Loading live administration data...</div>:overview&&<>
+   <div className="admin-dashboard-welcome panel"><div><span className="eyebrow">PLATFORM SNAPSHOT</span><h2>Placement operations at a glance</h2><p>These figures are loaded live from your PlaceMate backend.</p></div><div className="admin-welcome-mark"><ShieldCheck size={26}/></div></div>
+   <div className="admin-metric-grid admin-dashboard-metrics">{metrics.map(([name,value,Icon,color,path])=><Link to={path} className="panel admin-metric admin-dashboard-metric" key={name}><div className="admin-metric-label"><span>{name}</span><i className={'stat-icon '+color}><Icon size={17}/></i></div><strong>{value??0}</strong><small>View details <ArrowUpRight size={12}/></small></Link>)}</div>
+   <div className="admin-quick-grid">{quickLinks.map(([title,description,Icon,path])=><Link to={path} className="panel admin-quick-card" key={title}><i><Icon size={19}/></i><div><strong>{title}</strong><p>{description}</p></div><ArrowRight size={16}/></Link>)}</div>
+   <div className="admin-dashboard-bottom">
+    <section className="panel table-panel admin-dashboard-activity"><div className="panel-heading"><div><h3>Recent applications</h3><p>Latest applications across all approved opportunities</p></div><Link to="/applications" className="text-link">All applications <ArrowRight size={14}/></Link></div>
+     {applications.length===0?<div className="empty-state"><FileText size={25}/><h3>No applications yet</h3><p>Student applications will appear here.</p></div>:<div className="table-scroll"><table><thead><tr><th>STUDENT</th><th>COMPANY / ROLE</th><th>DEPARTMENT</th><th>APPLIED</th><th>STATUS</th></tr></thead><tbody>{applications.slice(0,6).map(row=><tr key={row.id}><td><strong>{row.studentName}</strong><small className="admin-cell-sub">{row.studentEmail}</small></td><td>{row.companyName}<small className="admin-cell-sub">{row.jobTitle}</small></td><td>{row.department||'—'}</td><td>{date(row.appliedAt)}</td><td><span className={'status-badge '+tone(row.status)}>{String(row.status||'').replaceAll('_',' ')}</span></td></tr>)}</tbody></table></div>}
+    </section>
+    <section className="panel admin-pending-panel"><div className="panel-heading"><div><h3>Pending job approvals</h3><p>Jobs waiting for placement-team review</p></div><span className="admin-pending-count">{pendingJobs.length}</span></div>
+     {pendingJobs.length===0?<div className="admin-report-empty">No jobs are waiting for approval.</div>:<div className="admin-pending-list">{pendingJobs.slice(0,5).map(job=><div className="admin-pending-item" key={job.id}><span className="admin-pending-icon"><BriefcaseBusiness size={16}/></span><div><strong>{job.title}</strong><small>{job.companyName||job.company||'Company'} · {job.location||'Location not specified'}</small></div><Link to="/approvals" aria-label={'Review '+job.title}><ArrowUpRight size={15}/></Link></div>)}</div>}
+     <Link to="/approvals" className="btn btn-primary admin-pending-cta">Open approval queue <ArrowRight size={14}/></Link>
+    </section>
+   </div>
+   <section className="panel table-panel admin-report-panel"><div className="panel-heading"><div><h3>Placement outcomes by department</h3><p>Distinct students with hired applications</p></div><Link to="/analytics" className="text-link">View analytics <ArrowRight size={14}/></Link></div>
+    {placements.length===0?<p className="admin-report-empty">No hired placement outcomes have been recorded yet.</p>:<div className="table-scroll"><table><thead><tr><th>DEPARTMENT</th><th>HIRED STUDENTS</th></tr></thead><tbody>{placements.slice(0,6).map(row=><tr key={row.department}><td>{row.department}</td><td><strong>{row.hiredStudents}</strong></td></tr>)}</tbody></table></div>}
+   </section>
+  </>}
+ </>
+}
+
+function AdminPortalPage({user,onLogout}) {
+ const nav=[
+  ['/admin',LayoutDashboard,'Overview'],
+  ['/students',GraduationCap,'Students'],
+  ['/recruiters',Users,'Recruiters'],
+  ['/companies',Building2,'Companies'],
+  ['/approvals',ShieldCheck,'Job approvals'],
+  ['/applications',FileText,'Applications'],
+  ['/analytics',ChartNoAxesCombined,'Analytics'],
+  ['/reports',ClipboardList,'Reports']
+ ]
+ return <div className="admin-portal-shell">
+  <aside className="admin-portal-sidebar">
+   <Link to="/admin" className="admin-portal-brand"><span className="admin-portal-brand-mark"><GraduationCap size={21}/></span><span>Place<span>Mate</span><small>ADMIN PORTAL</small></span></Link>
+   <div className="admin-portal-nav-label">WORKSPACE</div>
+   <nav>{nav.map(([to,Icon,label])=><Link key={to} to={to} className={window.location.pathname===to?'active':''}><Icon size={17}/><span>{label}</span>{to==='/approvals'&&<span className="admin-portal-nav-dot"/>}</Link>)}</nav>
+   <div className="admin-portal-sidebar-bottom"><div className="admin-portal-user"><span><ShieldCheck size={17}/></span><div><strong>{user?.fullName||'Administrator'}</strong><small>Platform administrator</small></div></div><button onClick={onLogout}><LogOut size={16}/> Sign out</button></div>
+  </aside>
+  <main className="admin-portal-main">
+   <header className="admin-portal-topbar"><div><span>PLACEMENT MANAGEMENT</span><strong>Administration</strong></div><div className="admin-portal-top-user"><span className="admin-portal-online"/>{user?.email||'Admin account'}</div></header>
+   <div className="admin-portal-content"><AdminDashboard/></div>
+  </main>
+ </div>
+}
+
 function Dashboard({role}) {
+ if(role==='Admin')return <AdminDashboard/>
  const isStudent=role==='Student', isRecruiter=role==='Recruiter'
  const [stats,setStats]=useState([])
  const [recent,setRecent]=useState([])
@@ -184,7 +274,7 @@ function Profile(){
     .finally(()=>{if(active)setLoading(false)})
   return()=>{active=false}
  },[])
- const change=e=>setForm(current=>({...current,[e.target.name]:e.target.value}))
+ const change=e=>{const {name,value}=e.target;setForm(current=>({...current,[name]:value}))}
  const submit=async e=>{
   e.preventDefault();setSaving(true);setError('');setSuccess('')
   const payload={
@@ -327,6 +417,8 @@ export default function App(){
   <Route path="/" element={<Landing/>}/>
   <Route path="/login" element={auth.token?<Navigate to="/dashboard" replace/>:<Login onAuthenticated={handleAuthenticated}/>}/>
   <Route path="/register" element={auth.token?<Navigate to="/dashboard" replace/>:<Login register onAuthenticated={handleAuthenticated}/>}/>
+  <Route path="/admin" element={auth.token?(role==='Admin'?<AdminPortalPage user={auth.user} onLogout={logout}/>:<Navigate to="/dashboard" replace/>):<Navigate to="/login" state={{from:'/admin'}} replace/>}/>
+
   <Route path="*" element={auth.token?<DashboardLayout role={role} onLogout={logout} user={auth.user}><Routes>
    <Route path="/dashboard" element={<Dashboard role={role}/>}/>
    <Route path="/jobs" element={role === "Recruiter" ? <RecruiterJobsPage/> : <JobsPage allowApply={role === "Student"}/>}/>

@@ -75,7 +75,7 @@ export const adminApi = {
 }
 
 export const resumeApi = {
-  upload: (file) => { const data = new FormData(); data.append('file', file); return api.post('/student/profile/resume', data, { headers: { 'Content-Type': 'multipart/form-data' } }) },
+  upload: (file) => { const data = new FormData(); data.append('file', file); return api.post('/student/profile/resume', data) },
   studentDownload: () => api.get('/student/resume', { responseType: 'blob' }),
   recruiterDownload: (applicationId) => api.get(`/recruiter/applications/${applicationId}/resume`, { responseType: 'blob' }),
 }

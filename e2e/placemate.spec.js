@@ -72,14 +72,53 @@ test('complete placement lifecycle: recruiter posting, admin approval, student a
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page).toHaveURL(/\/dashboard$/)
   await page.getByRole('navigation').getByRole('link', { name: 'Post a job' }).click()
-  await page.getByLabel('Job title').fill(jobTitle)
-  await page.getByLabel('Company name').fill('Lifecycle Test Company')
-  await page.getByLabel('Location').fill('Mohali · Hybrid')
-  await page.getByLabel('Employment type').selectOption('FULL_TIME')
-  await page.getByLabel('Minimum CGPA').fill('6.0')
-  await page.getByLabel(/Required skills/).fill('Java, Spring Boot')
-  await page.getByLabel('Job description').fill('Browser-tested placement lifecycle role.')
+  // Routes are wrapped in Framer Motion with AnimatePresence mode="wait". Do not
+  // interact while the old route is exiting: the new route can still be remounted
+  // at the end of the 200ms transition, clearing controlled form state mid-test.
+  await expect(page.locator('.dashboard-content > div').first()).toHaveCSS('transform', 'none')
+  await expect(page.locator('.post-job-form')).toBeVisible()
+  // Scope selectors to the actual job form so similarly named registration fields
+  // or future layout controls can never receive the test input accidentally.
+  const jobForm = page.locator('.post-job-form')
+  const titleInput = jobForm.locator('input[name="title"]')
+  const companyInput = jobForm.locator('input[name="companyName"]')
+  const locationInput = jobForm.locator('input[name="location"]')
+  const skillsInput = jobForm.locator('input[name="requiredSkills"]')
+  const descriptionInput = jobForm.locator('textarea[name="description"]')
+  await titleInput.fill(jobTitle)
+  await expect(titleInput).toHaveValue(jobTitle)
+  await companyInput.fill('Lifecycle Test Company')
+  await expect(companyInput).toHaveValue('Lifecycle Test Company')
+  await locationInput.fill('Mohali · Hybrid')
+  await expect(locationInput).toHaveValue('Mohali · Hybrid')
+  await jobForm.locator('select[name="employmentType"]').selectOption('FULL_TIME')
+  await jobForm.locator('input[name="minCgpa"]').fill('6.0')
+  await skillsInput.fill('Java, Spring Boot')
+  await expect(skillsInput).toHaveValue('Java, Spring Boot')
+  await descriptionInput.fill('Browser-tested placement lifecycle role.')
+  await expect(descriptionInput).toHaveValue('Browser-tested placement lifecycle role.')
+  // Assert controlled form values before submitting so regressions in React state handling are caught.
+  const formValidity = await page.locator('form').evaluate(form => ({
+    valid: form.checkValidity(),
+    invalidFields: [...form.elements].filter(field => !field.checkValidity()).map(field => ({
+      name: field.name, value: field.value, validationMessage: field.validationMessage,
+    })),
+  }))
+  expect(formValidity, JSON.stringify(formValidity)).toEqual({ valid: true, invalidFields: [] })
+  const createJobResponsePromise = page.waitForResponse(response =>
+    response.request().method() === 'POST' &&
+    new URL(response.url()).pathname.endsWith('/api/recruiter/jobs'),
+    { timeout: 15000 }
+  )
   await page.getByRole('button', { name: 'Submit for approval' }).click()
+  let createJobResponse
+  try {
+    createJobResponse = await createJobResponsePromise
+  } catch (error) {
+    const visibleError = await page.locator('.auth-error').allTextContents()
+    throw new Error(`Job form did not reach POST /api/recruiter/jobs. Visible errors: ${visibleError.join(' | ') || 'none'}. ${error.message}`)
+  }
+  expect(createJobResponse.status(), await createJobResponse.text()).toBe(201)
   await expect(page.getByRole('status')).toContainText('Job saved and submitted for admin approval.')
 
   // Admin is provisioned only in the isolated CI E2E environment.
