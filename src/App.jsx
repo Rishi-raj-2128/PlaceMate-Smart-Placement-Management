@@ -184,7 +184,7 @@ function Profile(){
     .finally(()=>{if(active)setLoading(false)})
   return()=>{active=false}
  },[])
- const change=e=>setForm(current=>({...current,[e.target.name]:e.target.value}))
+ const change=e=>{const {name,value}=e.target;setForm(current=>({...current,[name]:value}))}
  const submit=async e=>{
   e.preventDefault();setSaving(true);setError('');setSuccess('')
   const payload={
