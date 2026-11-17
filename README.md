@@ -116,6 +116,31 @@ docker compose up --build -d
 
 Open `http://localhost` (or the configured `APP_PORT`). MySQL data and uploaded resumes are stored in named Docker volumes. Back up these volumes before upgrades or migration. Nginx adds baseline browser security headers, applies an edge rate limit to login/registration, and permits the configured 5 MB resume uploads. The Compose stack serves HTTP; put it behind a TLS-terminating reverse proxy before exposing it publicly.
 
+## Verification matrix
+
+The automated checks are split by layer. A green workflow means the listed automated checks passed in CI; it does not replace a review against a deployed environment.
+
+| Layer | Coverage |
+|---|---|
+| Frontend | Vite production build; Axios API client uses the configured `VITE_API_BASE_URL`, attaches the JWT, and clears expired/unauthorized sessions |
+| Backend | Maven verification against MySQL 8.4; service and MockMvc integration tests for authentication, authorization, jobs, applications, profiles, resumes, interviews, notifications and admin reporting |
+| Browser | Playwright Chromium journeys for registration/login, protected routes, recruiter job posting, admin approval, student application, recruiter shortlist, interview scheduling and student notification |
+| Deployment configuration | Docker Compose configuration validation and Nginx configuration syntax validation |
+
+### Critical workflow acceptance criteria
+
+1. Recruiter registers and signs in; recruiter-only routes reject other roles.
+2. Recruiter posts a job; it is saved as pending and is not publicly discoverable.
+3. Admin reviews and approves the pending job; non-admin roles cannot approve it.
+4. Student browses the approved job and applies; a second application for the same job is rejected.
+5. Recruiter can see and update applicants only for jobs owned by that recruiter.
+6. Recruiter schedules an interview; the student receives an in-app notification and can view the interview.
+7. Student can upload and download their own supported resume; another recruiter cannot download it unless the student applied to that recruiter's job.
+
+### Manual release checks
+
+Before a public deployment, verify real SMTP/email delivery if configured, production HTTPS and reverse-proxy settings, secret rotation, database backups/migrations, file-volume permissions and browser behavior on supported desktop/mobile devices. The current notification implementation is in-app; do not treat it as email/SMS delivery.
+
 ## Development log
 
 - **Foundation:** responsive landing page, role-aware dashboard layouts, navigation and base UI.
