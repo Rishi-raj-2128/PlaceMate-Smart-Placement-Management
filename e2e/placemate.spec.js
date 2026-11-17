@@ -72,6 +72,11 @@ test('complete placement lifecycle: recruiter posting, admin approval, student a
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(page).toHaveURL(/\/dashboard$/)
   await page.getByRole('navigation').getByRole('link', { name: 'Post a job' }).click()
+  // Routes are wrapped in Framer Motion with AnimatePresence mode="wait". Do not
+  // interact while the old route is exiting: the new route can still be remounted
+  // at the end of the 200ms transition, clearing controlled form state mid-test.
+  await expect(page.locator('.dashboard-content > div').first()).toHaveCSS('transform', 'none')
+  await expect(page.locator('.post-job-form')).toBeVisible()
   // Scope selectors to the actual job form so similarly named registration fields
   // or future layout controls can never receive the test input accidentally.
   const jobForm = page.locator('.post-job-form')
